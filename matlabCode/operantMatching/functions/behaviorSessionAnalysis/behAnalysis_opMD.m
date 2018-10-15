@@ -347,7 +347,7 @@ plot([0 tMax],[0 0],'k--')
 
 
 %% exponential decay fit to beta values from linear regression
-expFit = singleExpFit(glm_rwd.Coefficients.Estimate(2:end));
+expFit = singleExpFit(glm_rwdANDnoRwd.Coefficients.Estimate(2:end));
 expConv = expFit.a*exp(-(1/expFit.b)*(1:10));
 expConv = expConv./sum(expConv);
                       
@@ -599,7 +599,7 @@ ylabel('Peak Lick Rate Z-Score')
 xlabel('Rewarded Trials')
 
 %plot scatters for reward history smoothed with kernel derived from beta coefficients (choices) v lick behavior  
-expFit = singleExpFit(glm_rwd.Coefficients.Estimate(2:end));
+expFit = singleExpFit(glm_rwdANDnoRwd.Coefficients.Estimate(2:end));
 expConv = expFit.a*exp(-(1/expFit.b)*(1:10));
 expConv = expConv./sum(expConv);
 rwdHx = conv(allRewardsBin,expConv);
