@@ -10,7 +10,9 @@ Q = zeros(trials,2);
 
 % Call learning rule
 for t = 1 : (trials-1)
-    if choice(t, 1) == 1 % right choice
+    if choice(t,1) == 2
+        Q(t+1,:) = 0;
+    elseif choice(t, 1) == 1 % right choice
         Q(t+1, 2) = alphaForget*Q(t, 2);
         pe(t) = outcome(t, 1) - Q(t, 1);
         if pe(t) < 0

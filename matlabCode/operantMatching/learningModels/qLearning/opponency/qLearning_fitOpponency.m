@@ -1,34 +1,34 @@
-function [model] = qLearning_fitOpponency(filename, revForFlag, figFlag, testFlag)
+function [model] = qLearning_fitOpponency(filename, varargin)
 
-if nargin < 4
-    testFlag = 0;
-end
-if nargin < 3
-    figFlag = 0;
-end
-if nargin < 2
-    revForFlag = 0;
-end
+p = inputParser;
+% default parameters if none given
+p.addParameter('figFlag', 0)
+p.addParameter('testFlag', 0)
+p.addParameter('revForFlag',0)
+p.addParameter('mouse',[])
+p.addParameter('category', [])
+p.parse(varargin{:});
 
-if revForFlag == 1
-    [behSessionData, unCorrectedBlockSwitch, out] = loadBehavioralData_revFor(filename);
-    behavStruct = parseBehavioralData_revFor(behSessionData, unCorrectedBlockSwitch);
+
+if ~isempty(p.Results.mouse)
+    behavStruct = parseBehavioralData_multiple(filename, p.Results.mouse, p.Results.category, p.Results.revForFlag);
 else
-    [behSessionData, unCorrectedBlockSwitch, out] = loadBehavioralData(filename);
+    [behSessionData, unCorrectedBlockSwitch, out] = loadBehavioralData(filename, p.Results.revForFlag);
     behavStruct = parseBehavioralData(behSessionData, unCorrectedBlockSwitch);
 end
 
-[root, sep] = currComputer_operantMatching();
 
 outcome = abs([behavStruct.allReward_R; behavStruct.allReward_L])';
 choice = abs([behavStruct.allChoice_R; behavStruct.allChoice_L])';
 ITI = [behavStruct.timeBtwn]';
 
 % Initialize models
-modelNames = {'fourParams_twoLearnRates_alphaForget', 'fiveParams_opponency_zero'};
-startValueCSVs = {'qLearningModel_4params_2learnRates_alphaForget_startValues.csv',...
-     'qLearningModel_5params_opponency_startValues.csv'};
-              
+modelNames = {'twoParams', 'threeParams_twoLearnRates', 'fourParams_twoLearnRates_alphaForget','fiveParams_opponency'};
+startValueCSVs = {'qLearningModel_2params_startValues.csv', 'qLearningModel_3params_2learnRates_startValues.csv',...
+    'qLearningModel_4params_2learnRates_alphaForget_startValues.csv', 'qLearningModel_5params_opponency_startValues.csv' };
+
+
+
 % Set up optimization problem
 options = optimset('Algorithm', 'interior-point','ObjectiveLimit',...
     -1.000000000e+300,'TolFun',1e-15, 'Display','off');
@@ -43,12 +43,12 @@ rBarStart_range = [0 1];
 tForget_range = [0 1];
 bias_range = [-5 5];
 
-if figFlag
+if p.Results.figFlag
     figure; hold on;
 end
 for currMod = 1:length(modelNames)
     startValues = csvread(startValueCSVs{currMod});
-    if testFlag == 1
+    if p.Results.testFlag == 1
         startValues = startValues(1, :);
     end
    
@@ -61,6 +61,29 @@ for currMod = 1:length(modelNames)
     numParam = size(startValues, 2);
     A=[eye(size(startValues, 2)); -eye(size(startValues, 2))];
     
+    
+    if strcmp(modelNames{currMod}, 'twoParams')
+        b=[ alphaPPE_range(2);  beta_range(2);
+           -alphaPPE_range(1); -beta_range(1)];
+        parfor r = 1:runs
+            [allParams(r, :), LH(r, :), exitFl(r, :), ~, ~, ~, hess(r, :, :)] = ...
+                fmincon(@qLearningModel_2params, startValues(r,:), A, b, [], [], [], [], [], options, choice, outcome);
+        end
+        [~,bestFit] = min(LH);
+        model.(modelNames{currMod}).bestParams = allParams(bestFit, :);
+        [~, model.(modelNames{currMod}).probChoice, model.(modelNames{currMod}).Q, model.(modelNames{currMod}).pe] = qLearningModel_2params(model.(modelNames{currMod}).bestParams, choice, outcome);
+    end
+    if strcmp(modelNames{currMod}, 'threeParams_twoLearnRates')
+        b=[ alphaNPE_range(2); alphaPPE_range(2);  beta_range(2);
+           -alphaNPE_range(1); -alphaPPE_range(1); -beta_range(1)];
+        parfor r = 1:runs
+            [allParams(r, :), LH(r, :), exitFl(r, :), ~, ~, ~, hess(r, :, :)] = ...
+                fmincon(@qLearningModel_3params_2learnRates, startValues(r,:), A, b, [], [], [], [], [], options, choice, outcome);
+        end
+        [~,bestFit] = min(LH);
+        model.(modelNames{currMod}).bestParams = allParams(bestFit, :);
+        [~, model.(modelNames{currMod}).probChoice, model.(modelNames{currMod}).Q, model.(modelNames{currMod}).pe] = qLearningModel_3params_2learnRates(model.(modelNames{currMod}).bestParams, choice, outcome);
+    end
     if strcmp(modelNames{currMod}, 'fourParams_twoLearnRates_alphaForget')
         b=[ alphaNPE_range(2);  alphaPPE_range(2);  alphaForget_range(2); beta_range(2);
            -alphaNPE_range(1); -alphaPPE_range(1); -alphaForget_range(1); -beta_range(1)];
@@ -202,7 +225,7 @@ for currMod = 1:length(modelNames)
     model.(modelNames{currMod}).CIvals = sqrt(diag(inv(bestHess)))'*1.96;
     model.(modelNames{currMod}).exitFl = exitFl(bestFit, :);
     
-    if figFlag
+    if p.Results.figFlag
         plot(model.(modelNames{currMod}).probChoice(:,1)/max(model.(modelNames{currMod}).probChoice(:,1)), 'linewidth', 2);
     end
 end
@@ -210,7 +233,7 @@ end
 model.choice = choice;
 model.outcome = outcome;
 
-if figFlag
+if p.Results.figFlag
     for i = 1:length(choice)
         if choice(i,1) == 1
             if outcome(i,1) == 1

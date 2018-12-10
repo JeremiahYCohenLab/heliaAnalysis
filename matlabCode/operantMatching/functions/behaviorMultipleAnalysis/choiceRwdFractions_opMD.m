@@ -1,7 +1,14 @@
-function [choiceRwdFractions] = choiceRwdFractions_opMD(xlFile, sheet)
+function [choiceRwdFractions] = choiceRwdFractions_opMD(xlFile, sheet, category)
 
 [root, sep] = currComputer();
 [~, dayList, ~] = xlsread(xlFile, sheet);
+[~,col] = find(~cellfun(@isempty,strfind(dayList, category)) == 1);
+dayList = dayList(2:end,col);
+
+endInd = find(cellfun(@isempty,dayList),1);
+if ~isempty(endInd)
+    dayList = dayList(1:endInd-1,:);
+end
 choiceFractions = [];
 rwdFractions = [];
 choiceRwdFractions = [];
@@ -22,7 +29,7 @@ for i = 1: length(dayList)
     if exist(sessionDataPath,'file')
         load(sessionDataPath)
     else
-        [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [behSessionData, blockSwitch, blockSwitchR, blockSwitchR] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
 
     %% Break session down into CS+ trials where animal responded
@@ -30,11 +37,11 @@ for i = 1: length(dayList)
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
     omitInds = isnan([behSessionData.rewardTime]); 
     
-    blockSwitchL = [blockSwitchL length(behSessionData)];
-    tempBlockSwitchL = blockSwitchL;
-    for j = 2:length(blockSwitchL)
-        subVal = sum(omitInds(tempBlockSwitchL(j-1):tempBlockSwitchL(j)));
-        blockSwitchL(j:end) = blockSwitchL(j:end) - subVal;
+    blockSwitchR = [blockSwitchR length(behSessionData)];
+    tempBlockSwitchR = blockSwitchR;
+    for j = 2:length(blockSwitchR)
+        subVal = sum(omitInds(tempBlockSwitchR(j-1):tempBlockSwitchR(j)));
+        blockSwitchR(j:end) = blockSwitchR(j:end) - subVal;
     end
 
     allReward_R = [behSessionData(responseInds).rewardR]; 
@@ -55,12 +62,14 @@ for i = 1: length(dayList)
     allRewards(logical(allReward_L)) = 1;
     
     
-    for j = 2:length(blockSwitchL)
-        choiceFractionTemp = sum(allChoice_L((blockSwitchL(j-1)+1):blockSwitchL(j))) / (blockSwitchL(j)-blockSwitchL(j-1));
+    for j = 2:length(blockSwitchR)
+        choiceFractionTemp = sum(allChoice_R((blockSwitchR(j-1)+1):blockSwitchR(j))) / (blockSwitchR(j)-blockSwitchR(j-1));
         choiceFractions = [choiceFractions; choiceFractionTemp]; 
-        rwdFractionTemp = sum(allReward_L((blockSwitchL(j-1)+1):blockSwitchL(j))) / sum(allRewards((blockSwitchL(j-1)+1):blockSwitchL(j)));
+        rwdFractionTemp = sum(allReward_R((blockSwitchR(j-1)+1):blockSwitchR(j))) / sum(allRewards((blockSwitchR(j-1)+1):blockSwitchR(j)));
         rwdFractions = [rwdFractions; rwdFractionTemp];
     end
 end
-
-choiceRwdFractions = horzcat(rwdFractions, choiceFractions);
+rmvInds = [find(isnan(choiceFractions))' find(isnan(rwdFractions))'];
+choiceFractions(rmvInds) = [];
+rwdFractions(rmvInds) = [];
+choiceRwdFractions = [rwdFractions choiceFractions];

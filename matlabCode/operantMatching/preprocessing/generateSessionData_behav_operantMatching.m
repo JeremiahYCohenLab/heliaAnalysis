@@ -58,7 +58,7 @@ for i = 1:length(sessionText)
         waterDeliverFlag = false;
         allL_licks = [];
         allR_licks = [];
-        for currTrialInd = tBegin+1:tEnd
+        for currTrialInd = tBegin:tEnd
             if ~isempty(strfind(sessionText{currTrialInd}, 'Contingency'))
                 temp = regexp(sessionText{currTrialInd}, '). ', 'split');
                 temp2 = regexp(temp(1,2), '/', 'split');

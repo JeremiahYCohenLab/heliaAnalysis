@@ -1,4 +1,4 @@
-function [aicTrialAvg, aicTimeAvg, semTrial, semTime] = logRegModelComparisonSession_opMD(xlFile, animal, category)
+function [s] = logRegModelComparisonSession_opMD(xlFile, animal, category)
 
 %determine root for file location
 [root, sep] = currComputer();
@@ -12,8 +12,8 @@ if ~isempty(endInd)
     dayList = dayList(1:endInd-1,:);
 end
 
-tMax = 20;
-timeMax = 127000;
+tMax = 10;
+timeMax = 121000;
 binSize = (timeMax - 1000)/tMax;
 timeBinEdges = [1000:binSize:timeMax];  %no trials shorter than 1s between outcome and CS on
 
@@ -54,13 +54,21 @@ for i = 1: length(dayList)
     allRewards(logical(allReward_R)) = 1;
     allRewards(logical(allReward_L)) = 1;
     
+    allNoRewards = allChoices;
+    allNoRewards(logical(allReward_R)) = 0;
+    allNoRewards(logical(allReward_L)) = 0;
+    
 
     rwdMatx = [];
+    noRwdMatx = [];
     for j = 1:tMax
         rwdMatx(j,:) = [NaN(1,j) allRewards(1:end-j)];
+        noRwdMatx(j,:) = [NaN(1,j) allNoRewards(1:end-j)];
     end
-    glm_rwd = fitglm([rwdMatx]', allChoice_R,'distribution','binomial','link','logit');
-    aicTrial(i) = aicbic(glm_rwd.LogLikelihood, tMax);
+    glm_trial = fitglm([rwdMatx' noRwdMatx'], allChoice_R,'distribution','binomial','link','logit');
+    aicTrial(i) = aicbic(glm_trial.LogLikelihood, tMax);
+    biasTrial(i) = abs(glm_trial.Coefficients.Estimate(1));
+    trialCoeffs(:,i) = glm_trial.Coefficients.Estimate(2:end); 
     
     
     %logistic regression for rwds in time
@@ -108,13 +116,16 @@ for i = 1: length(dayList)
                 end
             end
         end
+        if isempty(timeTmpL) & isempty(timeTmpR)
+            rwdTmpMatx(:,j) = 0;
+        end
         if ~isempty(nTimeTmpL)
             binnedNoRwds = discretize(nTimeTmpL,timeBinEdges);
             for k = 1:tMax
                 if ~isempty(binnedNoRwds == k)
                     noRwdTimeMatx(k,j) = -1*sum(binnedNoRwds == k);
                 else
-                    noRwdTimeMatx(k,j) = NaN;
+                    noRwdTimeMatx(k,j) = 0;
                 end
             end
         end
@@ -126,23 +137,29 @@ for i = 1: length(dayList)
                 elseif ~isempty(binnedNoRwds == k) & ~isnan(noRwdTimeMatx(k,j))
                     noRwdTimeMatx(k,j) = noRwdTimeMatx(k,j) + sum(binnedNoRwds == k);
                 else
-                    noRwdTimeMatx(k,j) = NaN;
+                    noRwdTimeMatx(k,j) = 0;
                 end
             end
+        end
+        if isempty(nTimeTmpL) & isempty(nTimeTmpR)
+            noRwdTmpMatx(:,j) = 0;
         end
     end
 
     rwdTimeMatx(:,1) = NaN;
-    glm_rwdTime = fitglm([rwdTimeMatx]', allChoice_R,'distribution','binomial','link','logit');
-%    glm_all = fitglm([rwdTimeMatx' noRwdTimeMatx'], allChoice_R,'distribution','binomial','link','logit');
-    aicTime(i) = aicbic(glm_rwdTime.LogLikelihood, tMax);
+    glm_time = fitglm([rwdTimeMatx' noRwdTimeMatx'], allChoice_R,'distribution','binomial','link','logit');
+    aicTime(i) = aicbic(glm_time.LogLikelihood, tMax);
+    biasTime(i) = abs(glm_time.Coefficients.Estimate(1));
+    timeCoeffs(:,i) = glm_time.Coefficients.Estimate(2:end);
     
 end
 
-aicTrialAvg = mean(aicTrial); 
-aicTimeAvg = mean(aicTime); 
-semTrial = std(aicTrial)/sqrt(length(aicTrial));
-semTime = std(aicTime)/sqrt(length(aicTime));
+s.aicTrial = aicTrial; 
+s.aicTime = aicTime; 
+s.biasTrial = biasTrial;
+s.biasTime = biasTime;
+s.meanCoeffsTrial = mean(trialCoeffs, 2);
+s.meanCoeffsTime = mean(timeCoeffs, 2);
 
 % figure; hold on;
 % errorbar([1 2],[aicTrialAvg aicTimeAvg],[semTrial semTime],[semTrial semTime],'Color', [0.7 0 1],'linewidth',2)

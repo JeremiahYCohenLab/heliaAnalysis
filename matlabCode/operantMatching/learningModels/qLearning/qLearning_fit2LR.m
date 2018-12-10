@@ -21,8 +21,9 @@ if ~isempty(cellName)
 end
 
 % Initialize models
-modelNames = {'fiveParams_twoLearnRates_alphaForget_bias'};
-startValueCSVs = {'qLearningModel_5params_2learnRates_alphaForget_startValues.csv'};
+modelNames = {'twoParams', 'fourParams_twoLearnRates_alphaForget', };
+startValueCSVs = {'qLearningModel_2params_startValues.csv', ...
+    'qLearningModel_4params_2learnRates_alphaForget_startValues.csv', 'qLearningModel_4params_2learnRates_tForget_startValues.csv'};
               
 % Set up optimization problem
 options = optimset('Algorithm', 'interior-point','ObjectiveLimit',...

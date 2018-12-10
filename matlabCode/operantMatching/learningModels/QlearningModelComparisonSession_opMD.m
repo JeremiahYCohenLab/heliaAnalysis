@@ -1,4 +1,4 @@
-function [fourParams, oppoParams, rBar] = QlearningModelComparisonSession_opMD(xlFile, animal, category, revForFlag)
+function [s] = QlearningModelComparisonSession_opMD(xlFile, animal, category, revForFlag)
 
 if nargin < 4
     revForFlag = 0;
@@ -17,18 +17,30 @@ if ~isempty(endInd)
 end
 
 rBar = [];
+s = struct;
 %loop for each session in the list
 for i = 1: length(dayList)
     fprintf('File number: %d of %d \n', i, length(dayList));
     sessionName = dayList{i};                       %extract relevant info from session title
     
-    Qmdls = qLearning_fitOpponency([sessionName '.asc'], revForFlag);
+    Qmdls = qLearning_fitOpponency([sessionName '.asc'], 'revForFlag', revForFlag);
     
-    fourParams(i,:) = [Qmdls.fourParams_twoLearnRates_alphaForget.bestParams Qmdls.fourParams_twoLearnRates_alphaForget.BIC];
-    oppoParams(i,:) = [Qmdls.fiveParams_opponency.bestParams Qmdls.fiveParams_opponency.BIC];
-    rBar = [rBar Qmdls.fiveParams_opponency.rBar'];
+    s.twoParams(i,:) = [Qmdls.twoParams.BIC];
+    s.threeParams(i,:) = [Qmdls.threeParams_twoLearnRates.BIC];
+    s.fourParams_aF(i,:) = [Qmdls.fourParams_twoLearnRates_alphaForget.bestParams Qmdls.fourParams_twoLearnRates_alphaForget.BIC];
+%     fourParams_tF(i,:) = [Qmdls.fourParams_twoLearnRates_tForget.bestParams Qmdls.fourParams_twoLearnRates_tForget.BIC];
+%     fiveParams_aF(i,:) = [Qmdls.fiveParams_twoLearnRates_alphaForget_bias.bestParams Qmdls.fiveParams_twoLearnRates_alphaForget_bias.BIC];
+    s.oppoParams(i,:) = [Qmdls.fiveParams_opponency.bestParams Qmdls.fiveParams_opponency.BIC];
+%    rBar = [rBar Qmdls.fiveParams_opponency.rBar'];
     
 end
+
+% figure; hold on;
+% title('BIC by session')
+% plot(fourParams_aF(:,end))
+% plot(fourParams_tF(:,end))
+% plot(fiveParams_aF(:,end))
+% legend('fourParams aF', 'fourParams tF', 'fiveParams aF bias')
 
 % figure; suptitle('4 param')
 % subplot(1,4,1); hold on; title('alpha NPE')

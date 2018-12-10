@@ -71,11 +71,7 @@ if iscell(cellName)
         clust(i) = find(~cellfun(@isempty,strfind(spikeFields,cellName{i})));
     end
 elseif regexp(cellName, 'all')
-    if p.Results.intanFlag
-        clust = find(~cellfun(@isempty,strfind(spikeFields,'C_')));
-    else
-        clust = find(~cellfun(@isempty,strfind(spikeFields,'SS')) & ~cellfun(@isempty,strfind(spikeFields,'TT')));
-    end
+        clust = find(~cellfun(@isempty,strfind(spikeFields,'C_')) | ~cellfun(@isempty,strfind(spikeFields,'TT')));
 else
     clust = find(~cellfun(@isempty,strfind(spikeFields,cellName)));
 end

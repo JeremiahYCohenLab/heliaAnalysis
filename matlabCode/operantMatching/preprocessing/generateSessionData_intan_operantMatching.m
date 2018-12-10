@@ -85,7 +85,7 @@ responseWindow = 2000;
 
 % Find tetrode data (files with SS and TT in the name)
 allVar = who;
-allClust = find(~cellfun(@isempty,strfind(allVar,'C_')))';
+allClust = find(~cellfun(@isempty,strfind(allVar,'C_')) | ~cellfun(@isempty,strfind(allVar,'TT_')))';
 for m = 1:length(allClust)
     eval(sprintf('%s = round(%s/1000);', allVar{allClust(m)}, allVar{allClust(m)})) % convert from us to ms
     sessionData(m).allSpikes = transpose(eval(allVar{allClust(m)}));

@@ -12,8 +12,8 @@ if trialFlag
     [preAll, tMax]= combineLogReg_opMD(file, animal, pre, revForFlag);
     [postAll,~]= combineLogReg_opMD(file, animal, post, revForFlag);
 else
-    [preRwd, preNoRwd, preAll, s]= combineLogRegTime_opMD(file, animal, pre, revForFlag);
-    [postRwd, postNoRwd, postAll,~]= combineLogRegTime_opMD(file, animal, post, revForFlag);
+    [preAll, s]= combineLogRegTime_opMD(file, animal, pre, revForFlag);
+    [postAll,~]= combineLogRegTime_opMD(file, animal, post, revForFlag);
     tMax = s.tMax;
 end
 
@@ -45,7 +45,7 @@ else
     xlabel('Reward n seconds back')
 end
 title('Combined Model - Reward')
-legend('pre', 'post')
+legend(['pre | intercept: ' num2str(preAll.Coefficients.Estimate(1))], ['post | intercept: ' num2str(postAll.Coefficients.Estimate(1))])
 ylabel('\beta Coefficient')
 
 
@@ -67,19 +67,14 @@ errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
     errorbar([1:tMax],coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
-    xlabel('Reward n trials back')
+    xlabel('No reward n trials back')
 else
     errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
     xlim([0 (s.tMax*s.binSize/1000 + s.binSize/1000)])
-    xlabel('Reward n seconds back')
+    xlabel('No reward n seconds back')
 end
-title('Combined Model - Reward')
-legend('pre', 'post')
-ylabel('\beta Coefficient')
 
 title('Combined Model - No Reward')
 legend('pre', 'post')
 ylabel('\beta Coefficient')
-
-
 suptitle(animal)

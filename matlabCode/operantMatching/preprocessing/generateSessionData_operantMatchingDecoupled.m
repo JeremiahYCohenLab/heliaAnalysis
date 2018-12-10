@@ -37,7 +37,7 @@ blockSwitchR = 1;
 
 for i = 1:length(sessionText)
     % determine beginning and end of trial
-    if regexp(sessionText{i},'L Trial ') == 1 % trial begin 
+    if regexp(sessionText{i},'L Trial ') % trial begin 
         temp1 = regexp(sessionText{i},'('); temp2 = regexp(sessionText{i},')');
         currTrial = str2double(sessionText{i}(temp1(1)+1:temp2(1)-1)); % current trial is in between parentheses
         
@@ -46,7 +46,7 @@ for i = 1:length(sessionText)
         tEndFlag = false;        
         j = i + 1; % start looking for last index of trial
         while (~tEndFlag) 
-            if regexp(sessionText{j},'L Trial ') == 1
+            if regexp(sessionText{j},'L Trial ')
                 tEnd = j - 1; 
                 tEndFlag = true;
             else
@@ -62,7 +62,7 @@ for i = 1:length(sessionText)
         allL_licks = [];
         allR_licks = [];
         for currTrialInd = tBegin+1:tEnd
-            if strfind(sessionText{currTrialInd}, 'Contingency') == 1
+            if strfind(sessionText{currTrialInd}, 'Contingency')
                 temp = regexp(sessionText{currTrialInd}, '). ', 'split');
                 temp2 = regexp(temp(1,2), '/', 'split');
                 behSessionData(currTrial).rewardProbL = str2double(temp2{1}{1});
@@ -78,11 +78,11 @@ for i = 1:length(sessionText)
                 temp = regexp(sessionText(currTrialInd), ': ', 'split');
                 behSessionData(currTrial).CSon = str2double(temp{1}{2});
             end
-            if regexp(sessionText{currTrialInd},'L: ') == 1
+            if regexp(sessionText{currTrialInd},'L: ')
                 temp = regexp(sessionText(currTrialInd), ': ', 'split');
                 allL_licks = [allL_licks str2double(temp{1}{2})];
                 behSessionData(1).allLicks = [behSessionData(1).allLicks str2double(temp{1}{2})];
-            elseif regexp(sessionText{currTrialInd},'R: ') == 1
+            elseif regexp(sessionText{currTrialInd},'R: ')
                 temp = regexp(sessionText(currTrialInd), ': ', 'split');
                 allR_licks = [allR_licks str2double(temp{1}{2})];
                 behSessionData(1).allLicks = [behSessionData(1).allLicks str2double(temp{1}{2})];
@@ -125,6 +125,13 @@ for i = 1:length(sessionText)
             if currTrialInd == tEnd % run this at the last index || currTrialInd == length(sessionText)-1
                 behSessionData(currTrial).licksL = allL_licks;
                 behSessionData(currTrial).licksR = allR_licks;
+%                 if waterDeliverFlag
+%                     if behSessionData(currTrial).rewardTime - behSessionData(currTrial).CSon < 5
+%                         behSessionData(currTrial).rewardR = NaN;
+%                         behSessionData(currTrial).rewardL = NaN;
+%                         behSessionData(currTrial).rewardTime = NaN;
+%                     end
+%                 end
                 if ~waterDeliverFlag
                     behSessionData(currTrial).rewardL = NaN;
                     behSessionData(currTrial).rewardR = NaN;
@@ -138,13 +145,13 @@ for i = 1:length(sessionText)
                 end
             end
         end
-        if regexp(sessionText{currTrialInd},'L Block Switch at Trial ') == 1
+        if regexp(sessionText{currTrialInd},'L Block Switch at Trial ')
             if currTrial ~= 1
                 blockSwitch = [blockSwitch currTrial];
                 blockSwitchL = [blockSwitchL currTrial];
             end
         end
-        if regexp(sessionText{currTrialInd},'R Block Switch at Trial ') == 1
+        if regexp(sessionText{currTrialInd},'R Block Switch at Trial ')
             if currTrial ~= 1
                 blockSwitch = [blockSwitch currTrial];
                 blockSwitchR = [blockSwitchR currTrial];

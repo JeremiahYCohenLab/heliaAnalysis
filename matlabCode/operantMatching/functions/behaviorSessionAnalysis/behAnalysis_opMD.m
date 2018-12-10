@@ -18,7 +18,7 @@ sessionFolder = ['m' animalName date];
 if isstrprop(sessionName(end), 'alpha')
     behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];
 else
-    behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_behSessionData_behav.mat'];
+    behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
 end
 
 if coupledFlag
@@ -315,11 +315,11 @@ for i = 1:tMax
     rwdMatx(i,:) = [NaN(1,i) allRewards(1:end-i)];
 end
 
-choiceMatx = [];
+allNoRewards = allChoices;
+allNoRewards(allRewards~=0) = 0;
+noRwdMatx = [];
 for i = 1:tMax
-    noRewards = allChoices;
-    noRewards(allRewards==0) = 0;
-    noRwdMatx(i,:) = [NaN(1,i) allChoices(1:end-i)];
+    noRwdMatx(i,:) = [NaN(1,i) allNoRewards(1:end-i)];
 end
 
 glm_rwdANDnoRwd = fitglm([rwdMatx; noRwdMatx]', allChoice_R, 'distribution','binomial','link','logit'); rsq = num2str(round(glm_rwdANDnoRwd.Rsquared.Adjusted*100)/100);

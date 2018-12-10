@@ -20,7 +20,7 @@ elseif strfind(filename, 'spike')
 elseif strfind(filename, 'LR')
     savepath = strcat('C:\Users\cooper_PC\Desktop\githubRepositories\cooperAnalysis\matlabCode\operantMatching\learningModels\qLearning\avgLearningRate\', filename);
 else
-    savepath = strcat('C:\Users\cooper_PC\Desktop\githubRepositories\cooperAnalysis\matlabCode\operantMatching\learningModels\qLearning\', filename);
+    savepath = strcat('C:\Users\cooper_PC\Desktop\githubRepositories\cooperAnalysis\matlabCode\operantMatching\learningModels\qLearning\metalearning\', filename);
 end
 
 csvwrite([savepath], startVals)

@@ -1,4 +1,8 @@
-function [behSessionData, blockSwitch, outputPathStruct] = loadBehavioralData(fileOrFolder)
+function [behSessionData, blockSwitch, outputPathStruct] = loadBehavioralData(fileOrFolder, revForFlag)
+
+if nargin < 2
+    revForFlag = 0;
+end
 
 [root, sep] = currComputer();
 
@@ -32,8 +36,15 @@ sortedFolder = dir(sortedFolderLocation);
 sessionDataInd = ~cellfun(@isempty,strfind({sortedFolder.name},'_behav.mat')) & ~cellfun(@isempty,strfind({sortedFolder.name},suptitleName)); 
 if any(sessionDataInd) % check if there is a file with suptitleName prefix and _behav.mat suffix
     load([sortedFolderLocation sortedFolder(sessionDataInd).name])
+    if revForFlag
+        behSessionData = sessionData;
+    end
 else
-    [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(suptitleName);
+    if revForFlag
+        [behSessionData, blockSwitch, ~] = generateSessionData_behav_operantMatching(behavioralDataPath);
+    else
+        [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(suptitleName);
+    end
 end
 
 outputPathStruct.suptitleName = suptitleName;

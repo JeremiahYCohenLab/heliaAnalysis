@@ -1,4 +1,4 @@
-function [glm_rwd, glm_noRwd, glm_all, t] = combineLogRegTime_opMD(xlFile, animal, category, revForFlag, plotFlag)
+function [glm_all, t] = combineLogRegTime_opMD(xlFile, animal, category, revForFlag, plotFlag)
 
 if nargin < 5
     plotFlag = 0;
@@ -19,8 +19,8 @@ if ~isempty(endInd)
     dayList = dayList(1:endInd-1,:);
 end
 
-timeMax = 127000;
-binSize = 6300;
+timeMax = 151000;
+binSize = 15000;  %6300 for trial length
 timeBinEdges = [1000:binSize:timeMax];  %no trials shorter than 1s between outcome and CS on
 tMax = length(timeBinEdges) - 1;
 rwdMatx =[];                            %initialize matrices for combining session data
@@ -151,9 +151,9 @@ for i = 1: length(dayList)
 end
 
 %logistic regression models
-glm_rwd = fitglm([rwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
-glm_noRwd = fitglm([noRwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
-glm_all = fitglm([rwdMatx' noRwdMatx'], combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
+glm_rwd = fitglm([rwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit');
+glm_noRwd = fitglm([noRwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit');
+glm_all = fitglm([rwdMatx' noRwdMatx'], combinedAllChoice_R,'distribution','binomial','link','logit');
 
 t = struct;
 t.binSize = binSize;

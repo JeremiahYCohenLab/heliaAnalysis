@@ -8,7 +8,7 @@ v = startValues(5);
 
 trials = length(choice);
 Q = zeros(trials,2);
-rBar = [0.56; zeros(trials-1,1)];
+rBar = [0.4; zeros(trials-1,1)];
 
 % Call learning rule
 for t = 1 : (trials-1)

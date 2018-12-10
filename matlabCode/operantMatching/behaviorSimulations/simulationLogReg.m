@@ -1,4 +1,4 @@
-function [mdl] = simulationLogReg(varargin)
+function [mdl, s] = simulationLogReg(varargin)
 
 
 %task and model parameters
@@ -6,18 +6,20 @@ p = inputParser;
 % default parameters if none given
 p.addParameter('bestParams', []);
 p.addParameter('runs', 5);
-p.addParameter('maxTrials', 200);
+p.addParameter('maxTrials', 300);
 p.addParameter('randomSeed', 27);
 p.addParameter('oppoFlag', 0);
 p.addParameter('figFlag', 0);
 p.addParameter('compareFlag', 1);
-p.addParameter('animalInfo', {'goodBehDays.xlsx','CG14','preS',0});
+p.addParameter('animalInfo', {'goodBehDays.xlsx','CG15','preS',0});
 p.parse(varargin{:});
 
 tMax = 12;
 rwdMatx = [];
 noRwdMatx = [];
 combinedAllChoice_R = [];
+allRewardsBin = [];
+changeChoice = [];
 rSeed = p.Results.randomSeed;
 
 if p.Results.compareFlag
@@ -25,6 +27,7 @@ if p.Results.compareFlag
 end
 
 for i = 1:p.Results.runs
+    fprintf('Run: %i of %i \n', i, p.Results.runs);
     rSeed = rSeed + 1;
     if p.Results.oppoFlag
         [rBar, allRewards, allChoices] = qLearningModel_opponency_sim('maxTrials', p.Results.maxTrials, 'bestParams', p.Results.bestParams,...
@@ -54,7 +57,21 @@ for i = 1:p.Results.runs
     rwdMatx = [rwdMatx NaN(tMax,100) rwdMatxTmp];
     noRwdMatx = [noRwdMatx NaN(tMax,100) noRwdMatxTmp];
     combinedAllChoice_R = [combinedAllChoice_R NaN(1,100) allChoice_R];
+    
+    allRewardsBin = allRewards;
+    allRewardsBin(allRewardsBin == -1) = 1;
+    allRewardsBin = allRewardsBin(1:end-1);
+    changeChoice = [false abs(diff(allChoices)) > 0];
+    changeChoice = changeChoice(2:end);
+    s.probSwitchNoRwd(i) = sum(changeChoice(allRewardsBin(1:end-1)==0))/sum(allRewardsBin(1:end-1)==0);
+    s.probStayRwd(i) = 1 - (sum(changeChoice(allRewardsBin(1:end-1)==1))/sum(allRewardsBin(1:end-1)==1));
 end
+
+
+s.ws(1,1)= mean(s.probStayRwd);
+s.ws(1,2) = std(s.probStayRwd)/sqrt(length((s.probStayRwd)));
+s.ls(1,1)= mean(s.probSwitchNoRwd);
+s.ls(1,2) = std(s.probSwitchNoRwd)/sqrt(length((s.probSwitchNoRwd)));
 
 
 mdl = fitglm([rwdMatx' noRwdMatx'], combinedAllChoice_R,'distribution','binomial','link','logit');

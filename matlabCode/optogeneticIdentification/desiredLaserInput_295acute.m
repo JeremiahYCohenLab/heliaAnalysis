@@ -13,13 +13,13 @@ if nargin < 3
     opticFiberTrans = 0.8;
 end
 
-% calibrated on 20180820
+% calibrated on 20181010 for split patch cords
 if laserSource == 473
-    p = [1.249 -7.344 (10.57 - desiredOutput/opticFiberTrans)];
+    p = [1.534 -9.007 (12.27 - desiredOutput*2/opticFiberTrans)];
     r = roots(p);
     laserInput = max(r);
 elseif laserSource == 532
-    p = [0.3323 11.64 (-26.09 - desiredOutput/opticFiberTrans)];
+    p = [0.295 10.73 (-23.84 - desiredOutput*2/opticFiberTrans)];
     r = roots(p);
     laserInput = max(r);
 else

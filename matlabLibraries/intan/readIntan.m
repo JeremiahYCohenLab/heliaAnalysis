@@ -1,4 +1,8 @@
-function [board_dig_in_data, amplifier_data, frequency_parameters] = readIntan(path, file)
+function [board_dig_in_data, amplifier_data, frequency_parameters] = readIntan(path, file, variableFlag)
+
+if nargin < 3
+    variableFlag = 0;
+end
 
 tic;
 filename = [path,file];
@@ -431,63 +435,65 @@ end
 % Move variables to base workspace.
 
 % new for version 2.01: move filename info to base workspace
-filename = file;
-move_to_base_workspace(filename);
-move_to_base_workspace(path);
+if variableFlag
+    filename = file;
+    move_to_base_workspace(filename);
+    move_to_base_workspace(path);
 
-move_to_base_workspace(notes);
-move_to_base_workspace(frequency_parameters);
-if (data_file_main_version_number > 1)
-    move_to_base_workspace(reference_channel);
-end
+    move_to_base_workspace(notes);
+    move_to_base_workspace(frequency_parameters);
+    if (data_file_main_version_number > 1)
+        move_to_base_workspace(reference_channel);
+    end
 
-if (num_amplifier_channels > 0)
-    move_to_base_workspace(amplifier_channels);
-    if (data_present)
-        move_to_base_workspace(amplifier_data);
-        move_to_base_workspace(t_amplifier);
+    if (num_amplifier_channels > 0)
+        move_to_base_workspace(amplifier_channels);
+        if (data_present)
+            move_to_base_workspace(amplifier_data);
+            move_to_base_workspace(t_amplifier);
+        end
+        move_to_base_workspace(spike_triggers);
     end
-    move_to_base_workspace(spike_triggers);
-end
-if (num_aux_input_channels > 0)
-    move_to_base_workspace(aux_input_channels);
-    if (data_present)
-        move_to_base_workspace(aux_input_data);
-        move_to_base_workspace(t_aux_input);
+    if (num_aux_input_channels > 0)
+        move_to_base_workspace(aux_input_channels);
+        if (data_present)
+            move_to_base_workspace(aux_input_data);
+            move_to_base_workspace(t_aux_input);
+        end
     end
-end
-if (num_supply_voltage_channels > 0)
-    move_to_base_workspace(supply_voltage_channels);
-    if (data_present)
-        move_to_base_workspace(supply_voltage_data);
-        move_to_base_workspace(t_supply_voltage);
+    if (num_supply_voltage_channels > 0)
+        move_to_base_workspace(supply_voltage_channels);
+        if (data_present)
+            move_to_base_workspace(supply_voltage_data);
+            move_to_base_workspace(t_supply_voltage);
+        end
     end
-end
-if (num_board_adc_channels > 0)
-    move_to_base_workspace(board_adc_channels);
-    if (data_present)
-        move_to_base_workspace(board_adc_data);
-        move_to_base_workspace(t_board_adc);
+    if (num_board_adc_channels > 0)
+        move_to_base_workspace(board_adc_channels);
+        if (data_present)
+            move_to_base_workspace(board_adc_data);
+            move_to_base_workspace(t_board_adc);
+        end
     end
-end
-if (num_board_dig_in_channels > 0)
-    move_to_base_workspace(board_dig_in_channels);
-    if (data_present)
-        move_to_base_workspace(board_dig_in_data);
-        move_to_base_workspace(t_dig);
+    if (num_board_dig_in_channels > 0)
+        move_to_base_workspace(board_dig_in_channels);
+        if (data_present)
+            move_to_base_workspace(board_dig_in_data);
+            move_to_base_workspace(t_dig);
+        end
     end
-end
-if (num_board_dig_out_channels > 0)
-    move_to_base_workspace(board_dig_out_channels);
-    if (data_present)
-        move_to_base_workspace(board_dig_out_data);
-        move_to_base_workspace(t_dig);
+    if (num_board_dig_out_channels > 0)
+        move_to_base_workspace(board_dig_out_channels);
+        if (data_present)
+            move_to_base_workspace(board_dig_out_data);
+            move_to_base_workspace(t_dig);
+        end
     end
-end
-if (num_temp_sensor_channels > 0)
-    if (data_present)
-        move_to_base_workspace(temp_sensor_data);
-        move_to_base_workspace(t_temp_sensor);
+    if (num_temp_sensor_channels > 0)
+        if (data_present)
+            move_to_base_workspace(temp_sensor_data);
+            move_to_base_workspace(t_temp_sensor);
+        end
     end
 end
 

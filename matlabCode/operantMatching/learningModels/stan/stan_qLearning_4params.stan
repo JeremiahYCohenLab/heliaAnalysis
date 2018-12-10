@@ -2,7 +2,7 @@ data {
   int<lower=1> N;
   int<lower=1> T;
   int<lower=1, upper=T> Tsesh[N];
-  int<lower=-1, upper=2> choice[N, T];
+  int<lower=0, upper=1> choice[N, T];
   real outcome[N, T];  // no lower and upper bounds
 }
 transformed data {
@@ -15,36 +15,36 @@ parameters {
   vector[4] mu_p;
   vector<lower=0>[4] sigma;
 
-  // Session-lQel raw parameters (for Matt trick)
+  // Session-level raw parameters
   vector[N] aN_pr;    // learning rate for NPE
   vector[N] aP_pr;    // learning rate for PPE
   vector[N] aF_pr;    // forgetting rate
   vector[N] beta_pr;  // inverse temperature
 }
 transformed parameters {
-  // session-lQel parameters
+// Transform session-level raw parameters
   vector<lower=0, upper=1>[N] aN;
   vector<lower=0, upper=1>[N] aP;
   vector<lower=0, upper=1>[N] aF;
   vector<lower=0, upper=10>[N] beta;
 
   for (i in 1:N) {
-    aN[i]   = Phi_approx(mu_p[1]  + sigma[1]  * aN_pr[i]);
-    aP[i]   = Phi_approx(mu_p[2]  + sigma[2]  * aP_pr[i]);
-    aF[i]   = Phi_approx(mu_p[3]  + sigma[3]  * aF_pr[i]);
-    beta[i] = Phi_approx(mu_p[4] + sigma[4] * beta_pr[i]);
+    aN[i]   = Phi_approx(mu_p[1] + sigma[1] * aN_pr[i]);
+    aP[i]   = Phi_approx(mu_p[2] + sigma[2] * aP_pr[i]);
+    aF[i]   = Phi_approx(mu_p[3] + sigma[3] * aF_pr[i]);
+    beta[i] = Phi_approx(mu_p[4] + sigma[4] * beta_pr[i]) * 10;
   }
 }
 model {
   // Hyperparameters
   mu_p  ~ normal(0, 1);
-  sigma ~ cauchy(0, 5);
+  sigma ~ cauchy(0, 1);
 
   // individual parameters
   aN_pr   ~ normal(0, 1);
   aP_pr   ~ normal(0, 1);
   aF_pr   ~ normal(0, 1);
-  beta_pr ~ normal(0, 10);
+  beta_pr ~ normal(0, 1);
 
   // session loop and trial loop
   for (i in 1:N) {
@@ -76,7 +76,7 @@ model {
   }
 }
 generated quantities {
-  // For group lQel parameters
+  // For group level parameters
   real<lower=0, upper=1> mu_aN;
   real<lower=0, upper=1> mu_aP;
   real<lower=0, upper=1> mu_aF;

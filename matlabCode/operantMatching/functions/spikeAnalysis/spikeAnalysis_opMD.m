@@ -46,8 +46,8 @@ end
 
 
 if p.Results.modelsFlag
-    Qmdls = qLearning_fitOpponency([sessionName '.asc'], p.Results.revForFlag);
-    rBar = Qmdls.fiveParams_opponency_zero.rBar;
+    Qmdls = qLearning_fitOpponency([sessionName '.asc'], 'revForFlag', p.Results.revForFlag);
+    rBar = Qmdls.fiveParams_opponency.rBar;
 %    R = Qmdls.fourParams_gradient.R;
     if p.Results.biasFlag
         sumQ = Qmdls.fiveParams_twoLearnRates_alphaForget_bias.Q(:,1) +  Qmdls.fiveParams_twoLearnRates_alphaForget_bias.Q(:,2);
@@ -94,11 +94,7 @@ if iscell(cellName)
         cellInd(i) = find(~cellfun(@isempty,strfind(spikeFields,cellName{i})));
     end
 elseif regexp(cellName, 'all')
-    if p.Results.intanFlag
-        cellInd = find(~cellfun(@isempty,strfind(spikeFields,'C_')));
-    else
-        cellInd = find(~cellfun(@isempty,strfind(spikeFields,'SS')) & ~cellfun(@isempty,strfind(spikeFields,'TT')));
-    end
+    cellInd = find(~cellfun(@isempty,strfind(spikeFields,'C_')) | ~cellfun(@isempty,strfind(spikeFields,'TT')));
 else
     cellInd = find(~cellfun(@isempty,strfind(spikeFields,cellName)));
 end
@@ -186,9 +182,11 @@ for i = 1:length(cellInd)
         b(:,j) = downsample(a(:,j),5);
     end
     figure; hold on;
-    plot(mySDF_prevNoRwd,'-','Color', [0.5 0 0.8],'LineWidth',2); hold on
-    plot(mySDF_prevRwd,'b','LineWidth',2)
+    plot(mySDF_prevNoRwd,'-','Color', [0.5 0 0.8],'LineWidth',1); hold on
+    plot(mySDF_prevRwd,'b','LineWidth',1)
     legend('prev no rwd', 'prev rwd');
+    set(gca, 'tickdir', 'out')
+    set(gcf, 'Position', [-1919 1 1920 1004]);
     
     noResp_spikeMatx = [];
     noRespInds = find(isnan([s.behSessionData.rewardTime]));
@@ -293,7 +291,7 @@ for i = 1:length(cellInd)
     
 end
 
-save([sortedFolderLocation '_spikeMdls.mat'], 'mdlStruct');
+save([sortedFolderLocation sessionName '_spikeMdls.mat'], 'mdlStruct');
 
 % if p.Results.modelsFlag
 %     [phasicMinP, phasicMin] = min(mdlStruct.(cellNameTemp).postCSspikeCountRwdHist.Coefficients.pValue(2:end, 1));

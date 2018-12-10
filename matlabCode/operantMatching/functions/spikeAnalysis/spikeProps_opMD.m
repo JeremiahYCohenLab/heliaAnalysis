@@ -1,8 +1,5 @@
-function [spikeStruct] = spikeProps_opMD(sessionName, cellName, saveFigFlag)
+function [spikeStruct, sessionData] = spikeProps_opMD(sessionName, cellName)
 
-if nargin < 3
-    saveFigFlag = 1;
-end
 
 % Path
 [root,sep] = currComputer();
@@ -23,13 +20,22 @@ end
 
 sortedFolder = dir(sortedFolderLocation);
 
-if any(~cellfun(@isempty,strfind({sortedFolder.name},'_nL.mat'))) == 1
-    sessionDataInd = ~cellfun(@isempty,strfind({sortedFolder.name},'_nL.mat'));
-    load([sortedFolderLocation sortedFolder(sessionDataInd).name])
+if regexp(cellName, 'T')
+    if any(~cellfun(@isempty,strfind({sortedFolder.name},'_nL.mat'))) == 1
+        sessionDataInd = ~cellfun(@isempty,strfind({sortedFolder.name},'_nL.mat'));
+        load([sortedFolderLocation sortedFolder(sessionDataInd).name])
+    else
+        [sessionData] = generateSessionData_nL_operantMatching(sessionName);
+    end
 else
-    [sessionData] = generateSessionData_nL_operantMatching(sessionName);
+    if any(~cellfun(@isempty,strfind({sortedFolder.name},'_intan.mat'))) == 1
+        sessionDataInd = ~cellfun(@isempty,strfind({sortedFolder.name},'_intan.mat'));
+        load([sortedFolderLocation sortedFolder(sessionDataInd).name])
+    else
+        [sessionData] = generateSessionData_intan_operantMatching(sessionName);
+    end
 end
-
+    
 
 %% Sort all spikes into a raster-able matrix
 
