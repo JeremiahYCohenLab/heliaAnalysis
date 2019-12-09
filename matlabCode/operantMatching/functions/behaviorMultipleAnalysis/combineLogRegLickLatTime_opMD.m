@@ -41,11 +41,12 @@ for i = 1: length(dayList)
 
     if exist(sessionDataPath,'file')
         load(sessionDataPath)
+        behSessionData = sessionData;
         if p.Results.revForFlag
-            behSessionData = sessionData;
+            %%behSessionData = sessionData;
         end
     else
-        [behSessionData, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
     end
     
     %%generate reward matrix for tMax trials

@@ -1,4 +1,4 @@
-function behAnalysis_opMD(sessionName, coupledFlag, saveFigFlag)
+function behAnalysis_opMAP(sessionName, coupledFlag, saveFigFlag)
 
 if nargin < 3
     saveFigFlag = 1;
@@ -26,7 +26,7 @@ if coupledFlag
         load(behSessionDataPath)
         behSessionData = sessionData;
     else
-        [behSessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatching(sessionName);
+        [behSessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
     end
 else
     if exist(behSessionDataPath,'file')
@@ -37,9 +37,11 @@ else
 end
 
 %% Break session down into CS+ trials where animal responded
-
 responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window%%response or correct response?
 omitInds = isnan([behSessionData.rewardTime]); 
+
+%%stateInds_safe = find([behSessionData.stateType] == 0); 
+%%stateInds_threat = find([behSessionData.stateType]== 1);
 
 origBlockSwitch = blockSwitch;
 tempBlockSwitch = blockSwitch;
@@ -47,7 +49,13 @@ for i = 2:length(blockSwitch)
     subVal = sum(omitInds(tempBlockSwitch(i-1):tempBlockSwitch(i)));
     blockSwitch(i:end) = blockSwitch(i:end) - subVal;
 end
+origstateSwitch = stateSwitch;
+tempstateSwitch = stateSwitch;
 
+for i = 2:length(stateSwitch)
+    subVal1 = sum(omitInds(tempstateSwitch(i-1):tempstateSwitch(i)));
+    stateSwitch(i:end) = stateSwitch(i:end) - subVal1;
+end
 allReward_R = [behSessionData(responseInds).rewardR]; 
 allReward_L = [behSessionData(responseInds).rewardL];  
 allChoices = NaN(1,length(behSessionData(responseInds))); 
@@ -84,14 +92,44 @@ subplot(6,8,[17:20 25:28]); hold on   %%probability of choice and reward plot
 normKern = normpdf(-15:15,0,4);
 normKern = normKern / sum(normKern);
 xVals = (1:(length(normKern) + length(allChoices) - 1)) - round(length(normKern)/2);
-plot(xVals, conv(allChoices,normKern)/max(conv(allChoices,normKern)),'k','linewidth',2);
-plot(xVals, conv(allRewards,normKern)/max(conv(allRewards,normKern)),'--','Color',[100 100 100]./255,'linewidth',2)
+plot(xVals, conv(allChoices,normKern)/max(abs(conv(allChoices,normKern))),'k','linewidth',2);
+plot(xVals, conv(allRewards,normKern)/max(abs(conv(allRewards,normKern))),'--','Color',[100 100 100]./255,'linewidth',2)
 xlabel('Trials')
 ylabel('<-- Left       Right -->')
 legend('Choices','Rewards')
 xlim([1 length(allChoice_R)])
 ylim([-1 1])
-
+hold on;
+for i = 1:length(stateSwitch)
+    if i ~= length(stateSwitch)
+        if behSessionData(origstateSwitch(i)).stateType == 0
+            sc_loc = origstateSwitch(i);
+            sc_loc1 = origstateSwitch(i+1);
+            h(1) = area([sc_loc sc_loc sc_loc1 sc_loc1], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+         elseif behSessionData(origstateSwitch(i)).stateType == 1
+            sc_loc3 = origstateSwitch(i);
+            sc_loc2 = origstateSwitch(i+1);
+            h(1) = area([sc_loc3 sc_loc3 sc_loc2 sc_loc2], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+        end
+    else 
+        if behSessionData(origstateSwitch(length(stateSwitch))).stateType == 0
+            sc_loc = origstateSwitch(length(stateSwitch));
+            h(1) = area([sc_loc sc_loc length(allChoice_R) length(allChoice_R)], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+         elseif behSessionData(origstateSwitch(length(stateSwitch))).stateType == 1
+            sc_loc = origstateSwitch(length(stateSwitch));
+            h(1) = area([sc_loc sc_loc length(allChoice_R) length(allChoice_R)], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+        end
+    end
+end
+for i = 1:length(behSessionData)
+    if ~isempty(behSessionData(i).AirpuffTimeOn)
+        plot(i, 0, 'h', 'MarkerFaceColor', [255,69,0]./255, 'MarkerSize', 10, 'MarkerEdgeColor', [1 1 0]); hold on;
+    end
+end
 if coupledFlag
     for i = 1:length(blockSwitch)
         bs_loc = blockSwitch(i);
@@ -243,7 +281,11 @@ for i = 1:length(behSessionData)
 %         j = j + 1;
 %     end
 end
-
+for i = 1:length(behSessionData)
+    if ~isnan(behSessionData(i).AirpuffTimeOn)
+        plot(i, 0.3, 'h', 'MarkerFaceColor', [255,69,0]./255, 'MarkerSize', 10, 'MarkerEdgeColor', [1 1 0]); hold on;
+    end
+end
 if coupledFlag
     for i = 1:length(blockSwitch)
         bs_loc = origBlockSwitch(i);
@@ -271,12 +313,38 @@ end
 text(0,1.5,'L/R');
 ylabel('<-- L       R  -->')
 
+for i = 1:length(stateSwitch)
+    if i ~= length(stateSwitch)
+        if behSessionData(origstateSwitch(i)).stateType == 0
+            sc_loc = origstateSwitch(i);
+            sc_loc1 = origstateSwitch(i+1);
+            h(1) = area([sc_loc sc_loc sc_loc1 sc_loc1], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+         elseif behSessionData(origstateSwitch(i)).stateType == 1
+            sc_loc = origstateSwitch(i);
+            sc_loc1 = origstateSwitch(i+1);
+            h(1) = area([sc_loc sc_loc sc_loc1 sc_loc1], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+        end
+    else 
+        if behSessionData(origstateSwitch(length(stateSwitch))).stateType == 0
+            sc_loc = origstateSwitch(length(stateSwitch));
+            h(1) = area([sc_loc sc_loc length(behSessionData) length(behSessionData)], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+         elseif behSessionData(origstateSwitch(length(stateSwitch))).stateType == 1
+            sc_loc = origstateSwitch(length(stateSwitch));
+            h(1) = area([sc_loc sc_loc length(behSessionData) length(behSessionData)], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+        end
+    end
+end
 % time plot
 subplot(6,8,[9:16]); hold on
 xlabel('Time (min)')
 j = 1;
 for i = 1:length(behSessionData)
-    currTime = (behSessionData(i).CSon - behSessionData(1).CSon)/1000/60; %convert to min
+    currTime = (behSessionData(i).CSon - behSessionData(1).CSon)/1000/60;
+    %convert to min
     if strcmp(behSessionData(i).trialType,'CSplus')
         if ~isnan(behSessionData(i).rewardR)
             if behSessionData(i).rewardR == 1 % R side rewarded
@@ -294,19 +362,47 @@ for i = 1:length(behSessionData)
         else % CSplus trial but no rewardL or rewardR
             plot([currTime currTime],[-rMag rMag],'r')
         end
+        for q = 1:length(origstateSwitch)
+            if any(i == origstateSwitch(q))
+                if q ~= length(origstateSwitch)
+              %currTimeNext = (behSessionData(origstateSwitch(i)).CSon -behSessionData(1).CSon)/1000/60;
+                    currTimeNextNext = (behSessionData(origstateSwitch(q+1)).CSon -behSessionData(1).CSon)/1000/60;
+                    if behSessionData(i).stateType == 0
+                        h(1) = area([currTime currTime currTimeNextNext currTimeNextNext], [-1 1 1 -1],-1); hold on;
+                        set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+                    elseif behSessionData(i).stateType == 1
+                        h(1) = area([currTime currTime currTimeNextNext currTimeNextNext], [-1 1 1 -1],-1); hold on;
+                        set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+                    end
+                else 
+                    lastTime = (behSessionData(length(behSessionData)).CSon - behSessionData(1).CSon)/1000/60;
+                    if behSessionData(i).stateType == 0
+                        h(1) = area([currTime currTime lastTime lastTime], [-1 1 1 -1],-1); hold on;
+                        set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+                    elseif behSessionData(i).stateType == 1
+                        h(1) = area([currTime currTime lastTime lastTime], [-1 1 1 -1],-1); hold on;
+                        set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+                    end
+                end
+            end
+        end
     else % CS minus trial
         plot([currTime currTime],0,'ko','markersize',4,'linewidth',2)
     end
     if any(i == origBlockSwitch)
         plot([currTime currTime],[-1*rMag rMag],'--','linewidth',1,'Color',[30 144 255]./255)
     end
+    
 %     if i > responseInds(1) & lickLat(i) > 250 & ~isnan(lickLat(i))
 %         plot([currTime currTime], [0 normRespLat(j)], '-', 'Color', [0.85 0.325 0.098])
 %         j = j + 1;
-%     end
+%     efor i = 1:length(behSessionData)
+    if ~isnan(behSessionData(i).AirpuffTimeOn)
+        CurrAirpuff = (behSessionData(i).CSon -behSessionData(1).CSon)/1000/60;
+        plot(CurrAirpuff, 0.3, 'h', 'MarkerFaceColor', [255,69,0]./255, 'MarkerSize', 10, 'MarkerEdgeColor', [1 1 0]); hold on;
+    end
 end
 xlim([0 currTime]);
-
 %% linear regression model
 
 tMax = 10;
@@ -466,7 +562,31 @@ xlim([0 limMax])
 ylim([0 limMax])
 legend('Choice','Income','location','best')
 xlabel('Cumulative Left Choices'); ylabel('Cumulative Right Choices')
-
+for i = 1:length(stateSwitch)
+    if i ~= length(stateSwitch)
+        if behSessionData(origstateSwitch(i)).stateType == 0
+            sc_loc = stateSwitch(i);
+            sc_loc1 = stateSwitch(i+1);
+            h(1) = area([sc_loc sc_loc sc_loc1 sc_loc1], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+         elseif behSessionData(origstateSwitch(i)).stateType == 1
+            sc_loc = stateSwitch(i);
+            sc_loc1 = stateSwitch(i+1);
+            h(1) = area([sc_loc sc_loc sc_loc1 sc_loc1], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+        end
+    else 
+        if behSessionData(origstateSwitch(length(stateSwitch))).stateType == 0
+            sc_loc = stateSwitch(length(stateSwitch));
+            h(1) = area([sc_loc sc_loc length(allChoice_R) length(allChoice_R)], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,240,245]./255,'EdgeColor',[255,240,245]./255, 'FaceAlpha', 0.3); hold on;
+         elseif behSessionData(origstateSwitch(length(stateSwitch))).stateType == 1
+            sc_loc = stateSwitch(length(stateSwitch));
+            h(1) = area([sc_loc sc_loc length(allChoice_R) length(allChoice_R)], [-1 1 1 -1],-1); hold on;
+            set(h(1),'FaceColor',[255,255,0]./255, 'EdgeColor',[255,255,0]./255, 'FaceAlpha', 0.1); hold on;
+        end
+    end
+end
 %%
 subplot(6,8,[33:36 41:44]); hold on;
 

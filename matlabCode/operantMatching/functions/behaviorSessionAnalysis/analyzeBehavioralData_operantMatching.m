@@ -39,6 +39,7 @@ else % input is the folder
     fileInd = ~cellfun(@isempty,strfind({allFiles.name},'.asc'));
     behavioralDataPath = [filepath allFiles(fileInd).name];
     sessionName = allFiles(fileInd).name;
+    sessionName = sessionName(1:strfind(sessionName,'.asc')-1);
     saveFigName = sessionFolder(~(sessionFolder==sep));
 end
 
@@ -82,7 +83,7 @@ allRewards(logical(allReward_L)) = -1;
 %% 
 figure
 set(gcf, 'Position', get(0,'Screensize'))
-suptitle(sessionName)
+%suptitle(sessionName)
 
 
 %%
@@ -121,6 +122,7 @@ end
 
 glm_rwd = fitglm([rwdMatx]', allChoice_R,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
 glm_choice = fitglm([choiceMatx]', allChoice_R, 'distribution','binomial','link','logit'); rsq{3} = num2str(round(glm_choice.Rsquared.Adjusted*100)/100);
+
 glm_rwdANDchoice = fitglm([rwdMatx; choiceMatx]', allChoice_R, 'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwdANDchoice.Rsquared.Adjusted*100)/100);
 
 % CIbands_rwd = coefCI(glm_rwd);

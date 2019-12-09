@@ -28,8 +28,9 @@ for i = 1: length(dayList)
 
     if exist(sessionDataPath,'file')
         load(sessionDataPath)
+        behSessionData = sessionData;
     else
-        [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [behSessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatching(sessionName);
     end
     
     

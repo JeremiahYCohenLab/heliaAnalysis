@@ -6,6 +6,6 @@ if ismac
     sep = '/';
 elseif ispc
 %     root = 'X:\';
-    root = 'Y:\';
+    root = 'C:\Users\Helia\Documents\heliaData\ompa\';
     sep = '\';
 end

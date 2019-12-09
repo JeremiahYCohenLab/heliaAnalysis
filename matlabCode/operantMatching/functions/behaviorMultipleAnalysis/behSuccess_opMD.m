@@ -45,6 +45,7 @@ for i = 1: length(dayList)
 
     if exist(sessionDataPath,'file')
         load(sessionDataPath)
+        behSessionData = sessionData;
         if revForFlag
             behSessionData = sessionData;
         end

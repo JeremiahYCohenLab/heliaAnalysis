@@ -37,16 +37,17 @@ for i = 1: length(dayList)
     else
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
-
     if exist(sessionDataPath,'file')
         load(sessionDataPath)
+        behSessionData = sessionData;
         if revForFlag
-            behSessionData = sessionData;
+            [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
         end
     elseif revForFlag                                    %otherwise generate the struct
-        [behSessionData, ~] = generateSessionData_operantMatching(sessionName);
+        [behsessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
+
     else
-        [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [sessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
     
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
