@@ -32,7 +32,7 @@ else
     if exist(behSessionDataPath,'file')
         load(behSessionDataPath)
     else
-        [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
 end
 
