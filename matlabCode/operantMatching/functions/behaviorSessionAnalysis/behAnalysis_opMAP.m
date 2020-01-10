@@ -423,6 +423,7 @@ glm_rwdANDnoRwd = fitglm([rwdMatx; noRwdMatx]', allChoice_R, 'distribution','bin
 subplot(6,8,[39 40 47 48]); hold on
 relevInds = 2:tMax+1;
 coefVals = glm_rwdANDnoRwd.Coefficients.Estimate(relevInds);
+disp(max(coefVals));
 CIbands = coefCI(glm_rwdANDnoRwd);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
