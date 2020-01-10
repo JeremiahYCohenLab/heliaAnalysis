@@ -45,11 +45,19 @@ for i = 1: length(dayList)
         load(sessionDataPath)
          %%behSessionData = sessionData;
         if revForFlag
+<<<<<<< HEAD
             %%behSessionData = sessionData;
         end
     elseif revForFlag                                    %otherwise generate the struct
         [behSessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
    
+=======
+            [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
+        end
+    elseif revForFlag                                    %otherwise generate the struct
+        [behsessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
+
+>>>>>>> 963104ec87bec4cf4cb002e049b2ee6a571a662b
     else
         [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
