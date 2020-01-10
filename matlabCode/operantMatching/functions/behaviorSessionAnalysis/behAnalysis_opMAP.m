@@ -85,7 +85,7 @@ end
 %% 
 figure
 set(gcf, 'Position', get(0,'Screensize'))
-suptitle(sessionName)
+%%suptitle(sessionName)
 
 %%
 subplot(6,8,[17:20 25:28]); hold on   %%probability of choice and reward plot
@@ -155,48 +155,72 @@ else
     end
 end
 text(0,1.12,'L/R');
-
-
-%% determine and plot lick latency distributions for each spout
+%% determine and plot lick latency distributions for each spout and state
 lickLat = [];       lickRate = [];
 lickLat_L = [];     lickRate_L = [];
 lickLat_R = [];     lickRate_R = [];
+lickLat_safe = [];        lickRate_safe = [];
+lickLat_threat= [];         lickRate_threat = [];
+lickLat_L_safe = [];        lickRate_L_safe = []; 
+lickLat_L_threat = [];      lickRate_L_threat = [];
+lickLat_R_safe = [];        lickRate_R_safe = [];
+lickLat_R_threat = [];        lickRate_R_threat = [];
 for i = 1:length(behSessionData)
     if ~isempty(behSessionData(i).rewardTime)
         lickLat = [lickLat behSessionData(i).rewardTime - behSessionData(i).CSon];
-        if ~isnan(behSessionData(i).rewardL)
+        if ~isnan(behSessionData(i).rewardL)  
             lickLat_L = [lickLat_L behSessionData(i).rewardTime - behSessionData(i).CSon];
-            if behSessionData(i).rewardL == 1
+            if (behSessionData(i).stateType == 0)
+                lickLat_L_safe = [lickLat_L_safe behSessionData(i).rewardTime - behSessionData(i).CSon];
+            else
+                lickLat_L_threat =  [lickLat_L_safe behSessionData(i).rewardTime - behSessionData(i).CSon];
+            end
+            if behSessionData(i).rewardL == 1 %calculate rate for when recieved reward?
                 if length(behSessionData(i).licksL) > 1
                     lickRateTemp = 1000/(min(diff(behSessionData(i).licksL)));  %%each trial has a lick latency
                     lickRate = [lickRate lickRateTemp];
                     lickRate_L = [lickRate_L lickRateTemp];
+                    if (behSessionData(i).stateType == 0)
+                        lickRate_L_safe =  [lickRate_L_safe lickRateTemp];
+                    else
+                        lickRate_L_threat =  [lickRate_L_threat lickRateTemp];
+                    end
                 else
                    lickRate = [lickRate 0];
                    lickRate_L = [lickRate_L 0]; 
+                   lickRate_L_safe = [lickRate_L_safe 0];
+                   lickRate_L_threat = [lickRate_L_threat 0];
                 end
             end
         elseif ~isnan(behSessionData(i).rewardR)
             lickLat_R = [lickLat_R behSessionData(i).rewardTime - behSessionData(i).CSon];      %make single licks zeros for easier indexing
+            if (behSessionData(i).stateType == 0)
+                lickLat_R_safe = [lickLat_R_safe behSessionData(i).rewardTime - behSessionData(i).CSon];
+            else
+                lickLat_R_threat =  [lickLat_R_threat behSessionData(i).rewardTime - behSessionData(i).CSon];
+            end
             if behSessionData(i).rewardR == 1
                 if length(behSessionData(i).licksR) > 1
                     lickRateTemp = 1000/(min(diff(behSessionData(i).licksR)));
                     lickRate = [lickRate lickRateTemp];
                     lickRate_R = [lickRate_R lickRateTemp];
+                    lickRate_R_safe = [lickRate_R_safe lickRateTemp];
+                    lickRate_R_threat = [lickRate_R_threat lickRateTemp];
                 else
                     lickRate = [lickRate 0];
                     lickRate_R = [lickRate_R 0];
-                end
+                    lickRate_R_safe = [lickRate_R_safe 0];
+                    lickRate_R_threat = [lickRate_R_threat 0];
+                end 
             end
         end
     end
 end
-
+%% do safe and threat. collapse r and l together
 subplot(6,8,[21 22]); hold on
-histogram(lickLat_L,0:50:1500,'Normalization','probability', 'FaceColor', 'm'); histogram(lickLat_R,0:50:1500,'Normalization','probability', 'FaceColor', 'c')
-legend('Left Licks','Right Licks')
+histogram(lickLat_L,0:50:1500,'Normalization','probability', 'FaceColor', 'm'); histogram(lickLat_R,0:50:1500,'Normalization','probability', 'FaceColor', 'c'); histogram(lickLat_L_safe,0:50:1500,'Normalization','probability', 'FaceColor', 'g'); histogram(lickLat_R_safe ,0:50:1500,'Normalization','probability', 'FaceColor', 'g'); histogram(lickLat_L_threat,0:50:1500,'Normalization','probability', 'FaceColor', 'y'); histogram(lickLat_R_threat ,0:50:1500,'Normalization','probability', 'FaceColor', 'y')
+legend('Left Licks','Right Licks', 'safe','safe','threat','threat')
 xlabel('Lick Latency (ms)')
-
 
 %% Z-scored lick latency analysis
 
@@ -213,9 +237,21 @@ else
 end
 
 responseLat_R = responseLat_R(responseLat_R > 250);        %remove lick latencies outside of normal distribution
+
 responseLat_L = responseLat_L(responseLat_L > 250);
 responseLat_R  = zscore(responseLat_R);                   %get z scores for lick latencies based on spout side average
 responseLat_L  = zscore(responseLat_L);
+lickRate_R_safe = lickRate_R_safe(lickRate_R_safe > 250);
+lickRate_R_threat = lickRate_R_threat(lickRate_R_threat > 250);
+norm_lickRate_R_safe = zscore(lickRate_R_safe);
+norm_lickRate_R_threat = zscore(lickRate_R_threat);
+lickRate_L_safe = lickRate_L_safe(lickRate_L_safe > 250);
+lickRate_L_threat = lickRate_L_threat(lickRate_L_threat > 250);
+norm_lickRate_L_safe = zscore(lickRate_L_safe);
+norm_lickRate_L_threat = zscore(lickRate_L_threat);
+
+
+
 choicesLick = allChoices(2:end);                        %make shifted choice array without preemptive licks
 choicesLick = choicesLick(lickLatInds);
 
@@ -408,7 +444,7 @@ xlim([0 currTime]);
 tMax = 10;
 rwdMatx = [];
 for i = 1:tMax
-    rwdMatx(i,:) = [NaN(1,i) allRewards(1:end-i)];
+    rwdMatx(i,:) = [NaN(1,i) allRewards(1:end-i)]; %remove the last reward
 end
 
 allNoRewards = allChoices;
@@ -440,6 +476,10 @@ legend('rwd', [sprintf('\n%s\n%s%s',['no rwd'], ['R^2' rsq ' | '], ['Int: ' num2
        'location','northeast')
 xlim([0.5 tMax+0.5])
 plot([0 tMax],[0 0],'k--') 
+%% can do glm_rwdANDnoRwd 1 and 2 for safe and threat
+
+
+
 
 
 %% exponential decay fit to beta values from linear regression
@@ -452,7 +492,7 @@ allRewardsBinary(find(allRewards == -1)) = 1;
 rwdHx = conv(allRewardsBinary,expConv);              %convolve with exponential decay to give weighted moving average
 rwdHx = rwdHx(1:end-(length(expConv)-1));                   %to account for convolution padding
 
-
+%same idea here: expfit 1 and 2
 
 %% Consec no rewards before switch and time since last reward before switch
 changeChoice = [false abs(diff(allChoices)) > 0];
@@ -624,7 +664,7 @@ end
 %%
 figure   %make new lick behavior analysis figure
 set(gcf, 'Position', get(0,'Screensize'))
-suptitle(sessionName)
+%%suptitle(sessionName)
 
 
 %% lick latency and recent rwd hist analysis

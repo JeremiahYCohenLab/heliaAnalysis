@@ -43,13 +43,13 @@ for i = 1: length(dayList)
 
     if exist(sessionDataPath,'file')        %load preprocessed struct if there is one
         load(sessionDataPath)
-         behSessionData = sessionData;
+         %%behSessionData = sessionData;
         if revForFlag
-            behSessionData = sessionData;
+            %%behSessionData = sessionData;
         end
     elseif revForFlag                                    %otherwise generate the struct
-        [sessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
-
+        [behSessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
+   
     else
         [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
     end

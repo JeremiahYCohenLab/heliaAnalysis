@@ -1,0 +1,1 @@
+code for having all animals in one structure : adapted from bilals
