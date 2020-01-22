@@ -305,7 +305,7 @@ for i = 1:length(behSessionData)
 %         j = j + 1;
 %     end
 end
-xlim([0 currTime]);
+xlim([0 currTime]); 
 
 %% linear regression model
 
