@@ -17,7 +17,6 @@ else
     tMax = s.tMax;
 end
 
-
 %plot beta coeffs for multiple covariate type model
 figure;
 subplot(1,2,1); hold on;
@@ -31,7 +30,6 @@ if trialFlag
 else
     errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'b','linewidth',2)
 end
-
 coefVals = postAll.Coefficients.Estimate(relevInds);
 CIbands = coefCI(postAll);
 errorL = abs(coefVals - CIbands(relevInds,1));
@@ -47,7 +45,6 @@ end
 title('Combined Model - Reward')
 legend(['pre | intercept: ' num2str(preAll.Coefficients.Estimate(1))], ['post | intercept: ' num2str(postAll.Coefficients.Estimate(1))])
 ylabel('\beta Coefficient')
-
 
 subplot(1,2,2); hold on;
 relevInds = tMax+2:tMax*2+1;

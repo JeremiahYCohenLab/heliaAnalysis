@@ -39,14 +39,15 @@ for i = 1: length(dayList)
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
 
-    if exist(sessionDataPath,'file')
-        load(sessionDataPath)
-        if p.Results.revForFlag
-            %%behSessionData = sessionData;
-        end
-    else
+%     if exist(sessionDataPath,'file')
+%        load(sessionDataPath)
+%        behSessionData = sessionData;
+%         if p.Results.revForFlag
+%            behSessionData = sessionData;
+%         end
+%     else
         [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
-    end
+%     end
     
     %%generate reward matrix for tMax trials
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
@@ -69,7 +70,7 @@ for i = 1: length(dayList)
         timeTmp = [];
         while j-k > 0 & behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime < timeMax
             if behSessionData(responseInds(j-k)).rewardL == 1 || behSessionData(responseInds(j-k)).rewardR == 1
-                timeTmp = [timeTmp (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
+                timeTmp = [timeTmp (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)]; %time from current choice to choice in earlier trial and next earlier trial and etc.
             end
             k = k + 1;
         end
@@ -99,13 +100,13 @@ for i = 1: length(dayList)
     
     %% determine lick latency distributions for each spout
     lickLat = [behSessionData(responseInds).rewardTime] - [behSessionData(responseInds).CSon];
-%     indsR = find(allChoices == 1);
-%     indsL = find(allChoices == -1);
-%     lickLat_R = zscore(lickLat(indsR));
-%     lickLat_L = zscore(lickLat(indsL));
-%     lickLat = NaN(1, length(allChoices));
-%     lickLat(indsR) = lickLat_R;
-%     lickLat(indsL) = lickLat_L;
+    indsR = find(allChoices == 1);
+    indsL = find(allChoices == -1);
+    lickLat_R = zscore(lickLat(indsR));
+    lickLat_L = zscore(lickLat(indsL));
+    lickLat = NaN(1, length(allChoices));
+    lickLat(indsR) = lickLat_R;
+    lickLat(indsL) = lickLat_L;
     
     combinedLickLat = [combinedLickLat NaN(1,101) lickLat(2:end)];
     

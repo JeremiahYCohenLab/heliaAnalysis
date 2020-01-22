@@ -25,6 +25,7 @@ sessionData.rewardProbR = [];
 sessionData.AirpuffTimeOn = [];
 sessionData.AirpuffTimeOff = [];
 sessionData.lickAfterpuff = [];
+sessionData.autopause = [];
 
 blockSwitch = 1;
 blockProbs = {};
@@ -74,6 +75,10 @@ for i = 1:length(sessionText)
         allL_licks = [];
         allR_licks = [];
         for currTrialInd = tBegin:tEnd
+            if ~isempty(strfind(sessionText{currTrialInd},'Number of Auto Pauses'))
+              temp12 = regexp(sessionText{currTrialInd}, ': ', 'split');
+              sessionData(currTrial).autopause = str2double(temp12(1,2));
+            end
             if ~isempty(strfind(sessionText{currTrialInd},'Airpuff On'))
                 if ~isempty(strfind(sessionText{currTrialInd},'Airpuff Off'))
                     temp6 = regexp(sessionText{currTrialInd}, ': ', 'split');
@@ -174,8 +179,6 @@ for i = 1:length(sessionText)
          end
      end
 end
-
-
 
 savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sorted' sep 'session' sep];
 if isempty(dir(savepath))

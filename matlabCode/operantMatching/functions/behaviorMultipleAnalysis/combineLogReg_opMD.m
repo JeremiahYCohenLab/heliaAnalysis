@@ -22,6 +22,7 @@ combinedRewardsMatx = [];
 combinedNoRewardsMatx = [];
 combinedTimesMatx = [];
 combinedAllChoice_R = [];
+combinedAirpuff_num = [];
 tMax = 12;
  
 
@@ -50,8 +51,10 @@ for i = 1: length(dayList)
         [sessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
     
+    
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
     omitInds = isnan([behSessionData.rewardTime]); 
+    airpuff_numind = find([behSessionData.AirpuffTimeOn]);
     allReward_R = [behSessionData(responseInds).rewardR]; 
     allReward_L = [behSessionData(responseInds).rewardL]; 
     allChoices = NaN(1,length(behSessionData(responseInds)));
@@ -97,15 +100,17 @@ for i = 1: length(dayList)
             rwdsTmp(j,k+j) = sum(allRewards(k:k+j-1));
         end
     end
-    
+    airpuff_num = size(airpuff_numind);
     rwdRateMatx = [rwdRateMatx NaN(tMax, 100) (rwdsTmp ./ timeTmp)];
     combinedRewardsMatx = [combinedRewardsMatx NaN(tMax,100) rwdMatxTmp];
     combinedNoRewardsMatx = [combinedNoRewardsMatx NaN(tMax,100) noRwdMatxTmp];
     combinedChoicesMatx = [combinedChoicesMatx NaN(tMax,100) choiceMatxTmp];
     combinedTimesMatx = [combinedTimesMatx NaN(tMax, 100) timeTmp];
     combinedAllChoice_R = [combinedAllChoice_R NaN(1,100) allChoice_R];
+    combinedAirpuff_num = [combinedAirpuff_num airpuff_num];
 end
 
+ave_combinedAirpuff_num = ((sum(combinedAirpuff_num)-length(dayList)))/length(dayList);
 
 %logistic regression models
 glm_rwd = fitglm([combinedRewardsMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
@@ -140,3 +145,7 @@ if plotFlag
     legend('rwd', 'no rwd')
     title([animal ' ' category])
 end
+
+disp(ave_combinedAirpuff_num);
+disp((sum(combinedAirpuff_num)-length(dayList)));
+disp(combinedAirpuff_num);

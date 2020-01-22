@@ -9,12 +9,12 @@
  %% separate data into safe and unsafe states and do reglog analysis indiivdualy for each. maybe comparing betas. 
  
  
- function [glm_rwdNoRwd_safe, tMax] = combineStates_opMAP(xlFile, animal, category, revForFlag)
+ function [glm_rwdNoRwd_safe, tMax] = combineStates_opMAP(xlFile, animal, category, revForFlag, plotFlag)
 
-% if nargin < 5
-%     plotFlag = 0;
-% end
-if nargin <4
+if nargin < 4
+    plotFlag = 0;
+end
+if nargin <3
     revForFlag = 0;
 end
 
@@ -209,7 +209,7 @@ CIbands = coefCI(glm_rwdNoRwd_safe);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 
-% if plotFlag
+if plotFlag
     figure; hold on;
     relevInds = 2:tMax+1;
     coefVals = glm_rwdNoRwd_safe.Coefficients.Estimate(relevInds);
@@ -230,5 +230,5 @@ errorU = abs(coefVals - CIbands(relevInds,2));
     xlim([0.5 tMax+0.5])
     legend('rwd', 'no rwd')
     title([animal ' ' category])
-% end
+end
 

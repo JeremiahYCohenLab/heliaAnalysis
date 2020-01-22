@@ -1,9 +1,9 @@
-function [glm_all, t] = combineLogRegTime_opMD(xlFile, animal, category, revForFlag, plotFlag)
+function [glm_all_safe, t] = combineLogRegTime_safe_opMAP(xlFile, animal, category, revForFlag)
 
-if nargin < 5
-    plotFlag = 0;
-end
-if nargin < 4
+% if nargin < 5
+%     plotFlag = 0;
+% end
+if nargin <4
     revForFlag = 0;
 end
 
@@ -41,30 +41,26 @@ for i = 1: length(dayList)
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
 
-    if exist(sessionDataPath,'file')        %load preprocessed struct if there is one
-        load(sessionDataPath)
-         behSessionData = sessionData;
-        if revForFlag
-           behSessionData = sessionData;
-        end
-    elseif revForFlag                                    %otherwise generate the struct
+%     if exist(sessionDataPath,'file')        %load preprocessed struct if there is one
+%         load(sessionDataPath)
+%          behSessionData = sessionData;
+%         if revForFlag
+%            behSessionData = sessionData;
+%         end
+%     elseif revForFlag                                    %otherwise generate the struct
         [behSessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
    
 
-            [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
-    end
-    if revForFlag                                    %otherwise generate the struct
-        [behsessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
-
-    else
-        [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
-    end
+%     else
+%         [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+%     end
     
     %create arrays for choices and rewards
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
-    allReward_R = [behSessionData(responseInds).rewardR]; 
-    allReward_L = [behSessionData(responseInds).rewardL]; 
-    allChoices = NaN(1,length(behSessionData(responseInds)));
+    responseInds_safe = find([behSessionData.stateType]== 0); 
+    allReward_R = [behSessionData(responseInds_safe).rewardR]; 
+    allReward_L = [behSessionData(responseInds_safe).rewardL]; 
+    allChoices = NaN(1,length(behSessionData(responseInds_safe)));
     allChoices(~isnan(allReward_R)) = 1;
     allChoices(~isnan(allReward_L)) = -1;
     allChoice_R = double(allChoices == 1);
@@ -77,24 +73,24 @@ for i = 1: length(dayList)
     allRewards(logical(allReward_L)) = 1;
 
     %create binned outcome matrices
-    rwdTmpMatx = NaN(tMax, length(responseInds));     %initialize matrices for number of response trials x number of time bins
-    noRwdTmpMatx = NaN(tMax, length(responseInds));
-    for j = 2:length(responseInds)          
+    rwdTmpMatx = NaN(tMax, length(responseInds_safe));     %initialize matrices for number of response trials x number of time bins
+    noRwdTmpMatx = NaN(tMax, length(responseInds_safe));
+    for j = 2:length(responseInds_safe)          
         k = 1;
         %find time between "current" choice and previous rewards, up to timeMax in the past 
         timeTmpL = []; timeTmpR = []; nTimeTmpL = []; nTimeTmpR = [];
-        while j-k > 0 & behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime < timeMax
-            if behSessionData(responseInds(j-k)).rewardL == 1
-                timeTmpL = [timeTmpL (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
+        while j-k > 0 & behSessionData(responseInds_safe(j)).rewardTime - behSessionData(responseInds_safe(j-k)).rewardTime < timeMax
+            if behSessionData(responseInds_safe(j-k)).rewardL == 1
+                timeTmpL = [timeTmpL (behSessionData(responseInds_safe(j)).rewardTime - behSessionData(responseInds_safe(j-k)).rewardTime)];
             end
-            if behSessionData(responseInds(j-k)).rewardR == 1
-                timeTmpR = [timeTmpR (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
+            if behSessionData(responseInds_safe(j-k)).rewardR == 1
+                timeTmpR = [timeTmpR (behSessionData(responseInds_safe(j)).rewardTime - behSessionData(responseInds_safe(j-k)).rewardTime)];
             end
-            if behSessionData(responseInds(j-k)).rewardL == 0
-                nTimeTmpL = [nTimeTmpL (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
+            if behSessionData(responseInds_safe(j-k)).rewardL == 0
+                nTimeTmpL = [nTimeTmpL (behSessionData(responseInds_safe(j)).rewardTime - behSessionData(responseInds_safe(j-k)).rewardTime)];
             end
-            if behSessionData(responseInds(j-k)).rewardR == 0
-                nTtimeTmpR = [nTimeTmpR (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
+            if behSessionData(responseInds_safe(j-k)).rewardR == 0
+                nTtimeTmpR = [nTimeTmpR (behSessionData(responseInds_safe(j)).rewardTime - behSessionData(responseInds_safe(j-k)).rewardTime)];
             end
             k = k + 1;
         end
@@ -159,9 +155,9 @@ for i = 1: length(dayList)
 end
 
 %logistic regression models
-glm_rwd = fitglm([rwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit');
-glm_noRwd = fitglm([noRwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit');
-glm_all = fitglm([rwdMatx' noRwdMatx'], combinedAllChoice_R,'distribution','binomial','link','logit');
+glm_rwd_safe = fitglm([rwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit');
+glm_noRwd_safe = fitglm([noRwdMatx]', combinedAllChoice_R,'distribution','binomial','link','logit');
+glm_all_safe = fitglm([rwdMatx' noRwdMatx'], combinedAllChoice_R,'distribution','binomial','link','logit');
 
 t = struct;
 t.binSize = binSize;
@@ -172,18 +168,18 @@ t.timeBinEdges = timeBinEdges;
 % if plotFlag
     figure; hold on;
     relevInds = 2:tMax+1;
-    coefVals = glm_all.Coefficients.Estimate(relevInds);
-    CIbands = coefCI(glm_all);
+    coefVals = glm_all_safe.Coefficients.Estimate(relevInds);
+    CIbands = coefCI(glm_all_safe);
     errorL = abs(coefVals - CIbands(relevInds,1));
     errorU = abs(coefVals - CIbands(relevInds,2));
     errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
 
-    relevInds = tMax+2:2*tMax+1;
-    coefVals = glm_all.Coefficients.Estimate(relevInds);
-    CIbands = coefCI(glm_all);
-    errorL = abs(coefVals - CIbands(relevInds,1));
-    errorU = abs(coefVals - CIbands(relevInds,2));
-    errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'b','linewidth',2)
+%     relevInds = tMax+2:2*tMax+1;
+%     coefVals = glm_all_safe.Coefficients.Estimate(relevInds);
+%     CIbands = coefCI(glm_all_safe);
+%     errorL = abs(coefVals - CIbands(relevInds,1));
+%     errorU = abs(coefVals - CIbands(relevInds,2));
+%     errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'b','linewidth',2)
 
     legend('Reward', 'No Reward')
     xlabel('Outcome n seconds back')
