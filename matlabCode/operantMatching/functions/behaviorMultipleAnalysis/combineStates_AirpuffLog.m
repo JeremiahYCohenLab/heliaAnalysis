@@ -1,5 +1,5 @@
- 
-function [glm_rwdNoRwd_threat, tMax] = combineStates_threat_opMAPP(xlFile, animal, category, revForFlag)
+function [glm_AirpuffANDchoice, tMax] = combineStates_AirpuffLog(xlFile, animal, category, revForFlag)
+%%Logit(GLM) of airpuff history and choice based on trials in thereatening state. 
 
 if nargin < 4
     %plotFlag = 0;
@@ -149,20 +149,20 @@ glm_AirpuffANDchoice =  fitglm([combinedAirpuff'], combinedAllChoice_R_threat,'d
 
 figure; hold on;
 relevInds = 2:tMax+1;
-coefVals = glm_rwdNoRwd_threat.Coefficients.Estimate(relevInds);
-CIbands = coefCI(glm_rwdNoRwd_threat);
+coefVals = glm_AirpuffANDchoice.Coefficients.Estimate(relevInds);
+CIbands = coefCI(glm_AirpuffANDchoice);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2);
 
-relevInds = tMax+2:length(glm_rwdNoRwd_threat.Coefficients.Estimate);
-coefVals = glm_rwdNoRwd_threat.Coefficients.Estimate(relevInds);
-CIbands = coefCI(glm_rwdNoRwd_threat);
+relevInds = tMax+2:length(glm_AirpuffANDchoice.Coefficients.Estimate);
+coefVals = glm_AirpuffANDchoice.Coefficients.Estimate(relevInds);
+CIbands = coefCI(glm_AirpuffANDchoice);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', 'b' ,'linewidth',2)
 
-xlabel('Reward n Trials Back')
+xlabel('Airpuff n Trials Back')
 ylabel('\beta Coefficient')
 xlim([0.5 tMax+0.5])
 legend('rwd', 'no rwd')

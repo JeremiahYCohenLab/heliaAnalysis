@@ -40,7 +40,7 @@ for i = 1: length(dayList)
     end
     if exist(sessionDataPath,'file')
         load(sessionDataPath)
-        %%behSessionData = sessionData;
+        behSessionData = sessionData;
         if revForFlag
             [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
         end

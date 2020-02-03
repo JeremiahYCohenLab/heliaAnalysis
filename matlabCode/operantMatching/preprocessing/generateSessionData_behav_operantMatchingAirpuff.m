@@ -87,14 +87,12 @@ for i = 1:length(sessionText)
                     temp8 = regexp(temp6{1,2}, ' :', 'split');
                     temp9 = temp8(1,2);
                     sessionData(currTrial).AirpuffTimeOff =str2double(temp9);
-                else
-                    if ~isempty(strfind(sessionText{currTrialInd+1},'Airpuff Off'))
+                elseif ~isempty(strfind(sessionText{currTrialInd+1},'Airpuff Off'))
                         temp10 = regexp(sessionText{currTrialInd+1}, ' :', 'split');
                         sessionData(currTrial).lickAfterpuff = 1;
                         temp11 = str2double(temp10(1,2));
                         sessionData(currTrial).AirpuffTimeOff = temp11;
                         sessionData(currTrial).AirpuffTimeOn =temp11+51;
-                    end
                 end
             end
             if ~isempty(strfind(sessionText{currTrialInd}, 'Contingency'))
@@ -158,6 +156,9 @@ for i = 1:length(sessionText)
             if currTrialInd == tEnd % run this at the last index || currTrialInd == length(sessionText)-1
                 sessionData(currTrial).licksL = allL_licks;
                 sessionData(currTrial).licksR = allR_licks;
+                if isempty(sessionData(currTrial).AirpuffTimeOn)
+                    sessionData(currTrial).AirpuffTimeOn = 0;
+                end
                 if ~waterDeliverFlag
                     sessionData(currTrial).rewardL = NaN;
                     sessionData(currTrial).rewardR = NaN;
@@ -179,7 +180,6 @@ for i = 1:length(sessionText)
          end
      end
 end
-
 savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sorted' sep 'session' sep];
 if isempty(dir(savepath))
     mkdir(savepath)

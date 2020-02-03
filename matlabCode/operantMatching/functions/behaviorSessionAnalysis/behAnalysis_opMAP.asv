@@ -87,9 +87,9 @@ hf =figure;
 set(gcf, 'Position', get(0,'Screensize'));
 aha = annotation(hf, 'textbox',[0.691 0.5 0.691 0.5],'String', '        safe', 'BackgroundColor',[255,240,245]./255, 'FitBoxToText','on'); hold on;
 bha = annotation(hf, 'textbox',[0.639 0.5 0.639 0.5],'String', 'under threat', 'BackgroundColor',[255,255,0]./255, 'FitBoxToText','on'); hold on; 
-% hold on;
-% str = '\ast';
-% text(0,1.2,str,'Interpreter','tex')
+str = '\ast';
+cha = annotation(hf, 'textbox',[0.01 0.5 0.691 0.5],'Interpreter' ,'tex'); hold on; 
+% set(aha, 'position',);
 %%suptitle(sessionName)
 
 %%
@@ -490,6 +490,12 @@ legend('rwd', [sprintf('\n%s\n%s%s',['no rwd'], ['R^2' rsq ' | '], ['Int: ' num2
        'location','northeast')
 xlim([0.5 tMax+0.5])
 plot([0 tMax],[0 0],'k--') 
+%% can do glm_rwdANDnoRwd 1 and 2 for safe and threat
+
+
+
+
+
 %% exponential decay fit to beta values from linear regression
 expFit = singleExpFit(glm_rwdANDnoRwd.Coefficients.Estimate(2:end));
 expConv = expFit.a*exp(-(1/expFit.b)*(1:10));

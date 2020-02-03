@@ -1,11 +1,11 @@
 function [root, sep] = currComputer_operantMatching()
 
 if ismac
-    root = '/Volumes/cooper/';
+    root = 'heliaseifikar/Documents/heliaData/';
   %  root = '/Volumes/bbari1/';
     sep = '/';
 elseif ispc
 %     root = 'X:\';
-    root = 'Y:\';
+    root = 'C:\Users\Helia\Documents\heliaData\ompa\';
     sep = '\';
 end
