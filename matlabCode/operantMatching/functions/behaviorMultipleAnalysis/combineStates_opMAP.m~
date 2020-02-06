@@ -168,7 +168,10 @@ for i = 1: length(dayList)
             combinedNoRewardsMatx_safe = [combinedNoRewardsMatx_safe NaN(tMax,100) combinedNoRewardsMatx_safe_state];
             combinedNoRewardsMatx_threat = [combinedNoRewardsMatx_threat NaN(tMax,100) combinedNoRewardsMatx_threat_state];
             combinedAllChoice_R_safe = [combinedAllChoice_R_safe NaN(1,100) combinedAllChoice_R_safe_state];
-            combinedAllChoice_R_threat= [combinedAllChoice_R_threat NaN(1,100) combinedAllChoice_R_threat_state];       
+            combinedAllChoice_R_threat= [combinedAllChoice_R_threat NaN(1,100) combinedAllChoice_R_threat_state];
+
+   
+            
 end
 %     rwdRateMatx_safe = [rwdRateMatx_safe NaN(tMax, 100) (rwdsTmp_safe ./ timeTmp_safe)];
 %     combinedRewardsMatx_safe = [combinedRewardsMatx_safe NaN(tMax,100) rwdMatxTmp_safe];
