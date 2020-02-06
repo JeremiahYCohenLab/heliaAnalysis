@@ -27,9 +27,9 @@ CIbands = coefCI(safeAll);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
-    errorbar([1:tMax],coefVals,errorL,errorU,'b','linewidth',2)
+    errorbar([1:tMax],coefVals,errorL,errorU,'Color',[1.0000 0.5804 0.7216],'linewidth',2)
 else
-    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'b','linewidth',2)
+    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color',[1.0000 0.5804 0.7216],'linewidth',2)
 end
 
 coefVals = threatAll.Coefficients.Estimate(relevInds);
@@ -37,10 +37,10 @@ CIbands = coefCI(threatAll);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
-    errorbar([1:tMax],coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+    errorbar([1:tMax],coefVals,errorL,errorU,'Color', [0.6863 0.7216 0.2314],'linewidth',2)
     xlabel('Reward n trials back')
 else
-    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color', [0.6863 0.7216 0.2314],'linewidth',2)
     xlim([0 (s.tMax*s.binSize/1000 + s.binSize/1000)])
     xlabel('Reward n seconds back')
 end
@@ -56,9 +56,9 @@ CIbands = coefCI(safeAll);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
-    errorbar([1:tMax],coefVals,errorL,errorU,'b','linewidth',2)
+    errorbar([1:tMax],coefVals,errorL,errorU,'Color',[1.0000 0.5804 0.7216],'linewidth',2)
 else
-    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'b','linewidth',2)
+    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color', [1.0000 0.5804 0.7216],'linewidth',2)
 end
 
 coefVals = threatAll.Coefficients.Estimate(relevInds);
@@ -66,10 +66,10 @@ CIbands = coefCI(threatAll);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
-    errorbar([1:tMax],coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+    errorbar([1:tMax],coefVals,errorL,errorU,'Color',[0.6863 0.7216 0.2314],'linewidth',2)
     xlabel('No reward n trials back')
 else
-    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+    errorbar(((1:s.tMax)*s.binSize/1000),coefVals,errorL,errorU,'Color',[0.6863 0.7216 0.2314],'linewidth',2)
     xlim([0 (s.tMax*s.binSize/1000 + s.binSize/1000)])
     xlabel('No reward n seconds back')
 end

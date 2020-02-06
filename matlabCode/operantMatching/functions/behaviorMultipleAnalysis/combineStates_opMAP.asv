@@ -82,7 +82,7 @@ for i = 1: length(dayList)
         stateSwitchInd_safe = find(stateInds(h)- statend(h +1) <= -1) ;
         stateSwitchInd_threat = find(stateInds(h)- statend(h +1) >= 1) ;
     end
-    
+    for responseInds_safe 
     
 %     stateSwitch = true;
 %     h = 0;
@@ -114,6 +114,11 @@ for i = 1: length(dayList)
             allNoRewards_safe(logical(allReward_R_safe)) = 0;
             allNoRewards_safe(logical(allReward_L_safe)) = 0;
 
+            
+            
+            
+            
+            
 %     outcomeTimes_safe = [behSessionData(responseInds_safe(d:h))).rewardTime] - behSessionData(responseInds(1)).rewardTime;
 %     outcomeTimes_safe = [diff(outcomeTimes_safe) NaN];
 
@@ -121,6 +126,9 @@ for i = 1: length(dayList)
             choiceMatxTmp_safe = [];
             noRwdMatxTmp_safe = [];
             airpuffMatxTmp = [];
+
+            
+            
             
             for j = 1:tMax
                 rwdMatxTmp_safe(j,:) = [NaN(1,j) allRewards_safe(1:end-j)];

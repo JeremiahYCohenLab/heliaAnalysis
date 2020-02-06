@@ -231,7 +231,8 @@ for i = 1:length(behSessionData)
 end
 %% do safe and threat. collapse r and l together
 subplot(6,8,[21 22]); hold on
-histogram(lickLat_L,0:50:1500,'Normalization','probability', 'FaceColor', 'm'); histogram(lickLat_R,0:50:1500,'Normalization','probability', 'FaceColor', 'c'); histogram(lickLat_L_safe,0:50:1500,'Normalization','probability', 'FaceColor', 'g'); histogram(lickLat_R_safe ,0:50:1500,'Normalization','probability', 'FaceColor', 'g'); histogram(lickLat_L_threat,0:50:1500,'Normalization','probability', 'FaceColor', 'y'); histogram(lickLat_R_threat ,0:50:1500,'Normalization','probability', 'FaceColor', 'y')
+histogram(lickLat_L,0:50:1500,'Normalization','probability', 'FaceColor', [ 153 0 153]./255); histogram(lickLat_R,0:50:1500,'Normalization','probability', 'FaceColor', [0 51 204]./255 ); histogram(lickLat_L_safe,0:50:1500,'Normalization','probability', 'FaceColor',    [1 1 1]); histogram(lickLat_R_safe ,0:50:1500,'Normalization','probability', 'FaceColor',   [1 1 1]); histogram(lickLat_L_threat,0:50:1500,'Normalization','probability', 'FaceColor',[255,255,0]./255); histogram(lickLat_R_threat ,0:50:1500,'Normalization','probability', 'FaceColor', [ 255,255,0]./255)
+
 legend('Left Licks','Right Licks', 'safe','safe','threat','threat')
 xlabel('Lick Latency (ms)')
 
@@ -476,14 +477,14 @@ disp(max(coefVals));
 CIbands = coefCI(glm_rwdANDnoRwd);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
-errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color','c','linewidth',2)
+errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', [0.7,1,1],'linewidth',2)
 
 relevInds = tMax+2:length(glm_rwdANDnoRwd.Coefficients.Estimate);
 coefVals = glm_rwdANDnoRwd.Coefficients.Estimate(relevInds);
 CIbands = coefCI(glm_rwdANDnoRwd);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
-errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color','m','linewidth',2)
+errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color',[0.3,1,0],'linewidth',2)
 xlabel('Outcome n Trials Back')
 ylabel('\beta Coefficient')
 legend('rwd', [sprintf('\n%s\n%s%s',['no rwd'], ['R^2' rsq ' | '], ['Int: ' num2str(round(100*glm_rwdANDnoRwd.Coefficients.Estimate(1))/100)])], ...
@@ -538,8 +539,8 @@ for i = find(changeChoice == 1)
 end
 
 subplot(6,8,[31 32]); hold on;
-histogram(changeHistogram_LtoR,0:max(changeHistogram), 'FaceColor', 'm')
-histogram(changeHistogram_RtoL,0:max(changeHistogram), 'FaceColor', 'c')
+histogram(changeHistogram_LtoR,0:max(changeHistogram), 'FaceColor', [0.7,1,1])
+histogram(changeHistogram_RtoL,0:max(changeHistogram), 'FaceColor', [0.3,1,0])
 legend('L -> R','R -> L')
 xlabel('Consec No Rewards Before Switch')
 
@@ -547,8 +548,8 @@ changeTimeHistogram_LtoR = ceil(changeTimeHistogram_LtoR / 1000);
 changeTimeHistogram_RtoL = ceil(changeTimeHistogram_RtoL / 1000);
 
 subplot(6,8,[29 30]); hold on;
-histogram(changeTimeHistogram_LtoR,0:10:(max([max(changeTimeHistogram_LtoR) max(changeTimeHistogram_RtoL)])+10), 'FaceColor', 'm')
-histogram(changeTimeHistogram_RtoL,0:10:(max([max(changeTimeHistogram_LtoR) max(changeTimeHistogram_RtoL)])+10), 'FaceColor', 'c')
+histogram(changeTimeHistogram_LtoR,0:10:(max([max(changeTimeHistogram_LtoR) max(changeTimeHistogram_RtoL)])+10), 'FaceColor', [0.7,1,1])
+histogram(changeTimeHistogram_RtoL,0:10:(max([max(changeTimeHistogram_LtoR) max(changeTimeHistogram_RtoL)])+10), 'FaceColor', [0.3,1,0])
 legend('L -> R','R -> L')
 xlabel('Time Since Last Reward Before Switch')
 
@@ -558,7 +559,7 @@ xlabel('Time Since Last Reward Before Switch')
 subplot(6,8,[23 24]);
 stayDuration = diff([1 find(diff(allChoices) ~= 0)]);
 if ~isempty(stayDuration)
-    histogram(stayDuration,1:max(stayDuration),'Normalization','probability', 'FaceColor', 'c')
+    histogram(stayDuration,1:max(stayDuration),'Normalization','probability', 'FaceColor', [0.3,1,0])
     xl = xlim; yl = ylim;
     allRewardsBin = allRewards;
     allRewardsBin(allRewards==-1) = 1;

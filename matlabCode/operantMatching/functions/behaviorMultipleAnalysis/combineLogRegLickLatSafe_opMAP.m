@@ -99,23 +99,25 @@ for i = 1: length(dayList)
             end
 %         end        
 %     end
+glm_rwdLickSafe = fitglm([combinedRewardsMatx]', combinedLickLat);
 end
 
 %linear regression model
-glm_rwdLickSafe = fitglm([combinedRewardsMatx]', combinedLickLat);
 
-if p.Results.plotFlag
-    figure; hold on
-    relevInds = 2:tMax+1;
-    coefVals = glm_rwdLickSafe.Coefficients.Estimate(relevInds);
-    CIbands = coefCI(glm_rwdLickSafe);
-    errorL = abs(coefVals - CIbands(relevInds,1));
-    errorU = abs(coefVals - CIbands(relevInds,2));
-    errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+% glm_rwdLickSafe = fitglm([combinedRewardsMatx]', combinedLickLat);
 
-    xlabel('Reward n Trials Back')
-    ylabel('\beta Coefficient')
-    xlim([0.5 tMax+0.5])
-
-    suptitle([animal ' ' category])
-end
+% if p.Results.plotFlag
+%     figure; hold on
+%     relevInds = 2:tMax+1;
+%     coefVals = glm_rwdLickSafe.Coefficients.Estimate(relevInds);
+%     CIbands = coefCI(glm_rwdLickSafe);
+%     errorL = abs(coefVals - CIbands(relevInds,1));
+%     errorU = abs(coefVals - CIbands(relevInds,2));
+%     errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+% 
+%     xlabel('Reward n Trials Back')
+%     ylabel('\beta Coefficient')
+%     xlim([0.5 tMax+0.5])
+% 
+%     suptitle([animal ' ' category])
+% end

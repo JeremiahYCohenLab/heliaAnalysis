@@ -25,9 +25,9 @@ CIbands = coefCI(glm_rwdLickSafe);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
-    errorbar([1:tMax],coefVals,errorL,errorU,'b','linewidth',2)
+    errorbar([1:tMax],coefVals,errorL,errorU,'Color', [255,204,255]./255,'linewidth',2)
 else
-    errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'b','linewidth',2)
+    errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [255,204,255]./255,'linewidth',2)
 end
 
 coefVals = glm_rwdLickThreat.Coefficients.Estimate(relevInds);
@@ -35,10 +35,10 @@ CIbands = coefCI(glm_rwdLickThreat);
 errorL = abs(coefVals - CIbands(relevInds,1));
 errorU = abs(coefVals - CIbands(relevInds,2));
 if trialFlag
-    errorbar([1:tMax],coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+    errorbar([1:tMax],coefVals,errorL,errorU,'Color', [255,255,0]./255,'linewidth',2)
     xlabel('Reward n trials back')
 else
-    errorbar(((1:timeMax)*binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+    errorbar(((1:timeMax)*binSize/1000),coefVals,errorL,errorU,'Color', [255,255,0]./255,'linewidth',2)
     xlim([0 (timeMax*binSize/1000 + binSize/1000)])
     xlabel('Reward n seconds back')
 end
@@ -51,7 +51,7 @@ ylabel('\beta Coefficient')
 figure;
 mag = [1 0 1];
 cyan = [0 1 1];
-set(gcf,'defaultAxesColorOrder',[mag; cyan]);
+set(gcf,'defaultAxesColorOrder',[[255,204,255]./255; [255,255,0]./255]);
 
 subplot(2,2,1)
 yyaxis left; histogram(safeStayLickLat, 30, 'Normalization', 'probability')

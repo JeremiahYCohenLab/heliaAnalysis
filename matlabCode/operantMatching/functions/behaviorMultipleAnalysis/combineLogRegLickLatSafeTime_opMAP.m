@@ -52,7 +52,7 @@ for i = 1: length(dayList)
     
     %%generate reward matrix for tMax trials
     responseInds = find(~isnan([behSessionData.rewardTime]));
-    responseInds_safe = find([behSessionData.stateType] == 0);
+    responseInds_safe = find([behSessionData(responseInds).stateType] == 0);
 %     allAirpuff = NaN(1,length(behSessionData(responseInds_threat)));
 %     allAirpuffInd = [behSessionData(responseInds_threat).AirpuffTimeOn];
 %     allAirpuff(~allAirpuffInd == 0) = 1;
