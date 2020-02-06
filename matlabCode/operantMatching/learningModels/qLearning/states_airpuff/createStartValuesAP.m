@@ -1,11 +1,8 @@
-function createStartValuesAP(filename) 
+function createStartValuesAP(filename, paramRanges) 
 
-[sessionData, blockSwitch,stateSwitch, out] = loadBehavioralDataAP(filename);
-b = parseBehavioralData(sessionData, blockSwitch);
-
-% if nargin < 2 
+if nargin < 2 
     paramRanges = [0.1 1; 0.1 1; 0.1 1; 0.1 1; 1 5; 0 1];
-% end
+end
     
 for i = 1:length(paramRanges)
     temp = linspace(paramRanges(i,1), paramRanges(i,2), 100);
