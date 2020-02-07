@@ -95,19 +95,19 @@ for i = 1: length(dayList)
         allAirpuffInd = [behSessionData(responseInds).AirpuffTimeOn];
         allAirpuff(~allAirpuffInd == 0) = 1;
         allAirpuff(isnan(allAirpuff)) = 0;
-    allReward_R = [behSessionData(responseInds_threat(responseInds)).rewardR]; 
-    allReward_L = [behSessionData(responseInds_threat(responseInds)).rewardL]; 
-    allChoices = NaN(1,length(behSessionData(responseInds_threat(responseInds))));
-    allChoices(~isnan(allReward_R)) = 1;
-    allChoices(~isnan(allReward_L)) = -1;
-    allChoice_R = double(allChoices == 1);
-    allChoice_L = double(allChoices == -1);
+        allReward_R = [behSessionData(responseInds_threat(responseInds)).rewardR]; 
+        allReward_L = [behSessionData(responseInds_threat(responseInds)).rewardL]; 
+        allChoices = NaN(1,length(behSessionData(responseInds_threat(responseInds))));
+        allChoices(~isnan(allReward_R)) = 1;
+        allChoices(~isnan(allReward_L)) = -1;
+        allChoice_R = double(allChoices == 1);
+        allChoice_L = double(allChoices == -1);
 
-    allReward_R(isnan(allReward_R)) = 0;
-    allReward_L(isnan(allReward_L)) = 0;
-    allRewards = zeros(1,length(allChoices));
-    allRewards(logical(allReward_R)) = 1;
-    allRewards(logical(allReward_L)) = 1;
+        allReward_R(isnan(allReward_R)) = 0;
+        allReward_L(isnan(allReward_L)) = 0;
+        allRewards = zeros(1,length(allChoices));
+        allRewards(logical(allReward_R)) = 1;
+        allRewards(logical(allReward_L)) = 1;
 
         %create binned outcome matrices
         rwdTmpMatx = NaN(tMax, length(responseInds));     %initialize matrices for number of response trials x number of time bins

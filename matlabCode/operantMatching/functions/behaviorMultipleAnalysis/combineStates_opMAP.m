@@ -126,6 +126,7 @@ for i = 1: length(dayList)
         choiceMatxTmp_safe = [];
         noRwdMatxTmp_safe = [];
         airpuffMatxTmp = [];
+        choiceMatxTmp_threat = [];
         if(stateSwitchInd_safeTmp(stateSwitchInd_safe(l+1)) ~=0 && stateSwitchInd_safeTmp(stateSwitchInd_safe(l)) ~= 0)
             if (length(stateSwitchInd_safe(l):stateSwitchInd_safe(l+1))> tMax)
                 for j = 1:tMax
@@ -133,14 +134,10 @@ for i = 1: length(dayList)
                     choiceMatxTmp_safe(j,:) = [NaN(1,j) allChoices(stateSwitchInd_safe(l):stateSwitchInd_safe(l+1)-j)];
                     noRwdMatxTmp_safe(j,:) = [NaN(1,j) allNoRewards(stateSwitchInd_safe(l):stateSwitchInd_safe(l+1)-j)];
                 end         
-                combinedRewardsMatx_safe_state = [combinedRewardsMatx_safe_state NaN(tMax, 15) rwdMatxTmp_safe];
-%              combinedRewardsMatx_safe_threat =  [combinedRewardsMatx_safe_threat NaN(tMax, 15) rwdMatxTmp(stateswitchThreat(l):stateswitchThreat(l+1))];
+                 combinedRewardsMatx_safe_state = [combinedRewardsMatx_safe_state NaN(tMax, 15) rwdMatxTmp_safe];
                  combinedNoRewardsMatx_safe_state = [combinedNoRewardsMatx_safe_state NaN(tMax,15) noRwdMatxTmp_safe];
-%              combinedNoRewardsMatx_safe_threat = [combinedNoRewardsMatx_threat_state NaN(tMax,15) noRwdMatxTmp(stateswitchThreat(l):stateswitchThreat(l+1))];
-%      combinedChoicesMatx_threat_state = [combinedChoicesMatx_threat_state NaN(tMax,13) choiceMatxTmp_threat];
-    %  combinedTimesMatx_threat_state = [combinedTimesMatx_threat_state NaN(tMax, 100) timeTmp_threat];
+                 combinedChoicesMatx_safe_state = [combinedChoicesMatx_safe_state NaN(tMax,15) choiceMatxTmp_safe];
                  combinedAllChoice_R_safe_state = [combinedAllChoice_R_safe_state NaN(1,15) allChoice_R(:,stateSwitchInd_safe(l):stateSwitchInd_safe(l+1))];
-%              combinedAllChoice_R_threat_state = [combinedAllChoice_R_safe_threat NaN(1,15) allChoice_R(stateswitchThreat(l):stateswitchThreat(l+1))];
             end
         end
     end
@@ -148,29 +145,28 @@ for i = 1: length(dayList)
     combinedRewardsMatx_safe = [combinedRewardsMatx_safe NaN(tMax,100) combinedRewardsMatx_safe_state];
     combinedNoRewardsMatx_safe = [combinedNoRewardsMatx_safe NaN(tMax,100) combinedNoRewardsMatx_safe_state];
     combinedAllChoice_R_safe = [combinedAllChoice_R_safe NaN(1,100) combinedAllChoice_R_safe_state];
-      
+    combinedChoicesMatx_safe = [combinedChoicesMatx_safe  NaN(tMax,100) combinedChoicesMatx_safe_state];
 end
 
 
 
 %logistic regression models
-%glam_rwd_safe =  firglm([combinedAirpuff_safe]', combinedAllChoice_R_safe,
 glm_rwd_safe = fitglm([combinedRewardsMatx_safe]', combinedAllChoice_R_safe,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd_safe.Rsquared.Adjusted*100)/100);
-% glm_choice_safe = fitglm([combinedChoicesMatx_safe]', combinedAllChoice_R_safe, 'distribution','binomial','link','logit'); rsq{3} = num2str(round(glm_choice_safe.Rsquared.Adjusted*100)/100);
-% glm_rwdANDchoice_safe = fitglm([combinedRewardsMatx_safe' combinedChoicesMatx_safe'], combinedAllChoice_R_safe, 'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwdANDchoice_safe.Rsquared.Adjusted*100)/100);
+glm_choice_safe = fitglm([combinedChoicesMatx_safe]', combinedAllChoice_R_safe, 'distribution','binomial','link','logit'); rsq{3} = num2str(round(glm_choice_safe.Rsquared.Adjusted*100)/100);
+glm_rwdANDchoice_safe = fitglm([combinedRewardsMatx_safe' combinedChoicesMatx_safe'], combinedAllChoice_R_safe, 'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwdANDchoice_safe.Rsquared.Adjusted*100)/100);
 % glm_time_safe = fitglm([combinedTimesMatx_safe]', combinedAllChoice_R_safe,'distribution','binomial','link','logit'); rsq{4} = num2str(round(glm_time_safe.Rsquared.Adjusted*100)/100);
 glm_rwdANDtime_safe = fitglm([combinedRewardsMatx_safe' combinedTimesMatx_safe'], combinedAllChoice_R_safe,'distribution','binomial','link','logit'); rsq{5} = num2str(round(glm_rwdANDtime_safe.Rsquared.Adjusted*100)/100);
 % glm_rwdRate_safe = fitglm([rwdRateMatx_safe]', combinedAllChoice_R_safe,'distribution','binomial','link','logit'); rsq{6} = num2str(round(glm_rwd_safe.Rsquared.Adjusted*100)/100);
 glm_rwdNoRwd_safe = fitglm([combinedRewardsMatx_safe' combinedNoRewardsMatx_safe'], combinedAllChoice_R_safe,'distribution','binomial','link','logit'); rsq{7} = num2str(round(glm_rwdNoRwd_safe.Rsquared.Adjusted*100)/100);
-% glm_all_safe = fitglm([combinedRewardsMatx_safe' combinedNoRewardsMatx_safe' combinedChoicesMatx_safe'], combinedAllChoice_R_safe, 'distribution','binomial','link','logit');
-% hold on;
-% figure; hold on;
-% relevInds = 2:tMax+1;
-% coefVals = glm_rwdNoRwd_safe.Coefficients.Estimate(relevInds);
-% CIbands = coefCI(glm_rwdNoRwd_safe);
-% errorL = abs(coefVals - CIbands(relevInds,1));
-% errorU = abs(coefVals - CIbands(relevInds,2));
-% errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+glm_all_safe = fitglm([combinedRewardsMatx_safe' combinedNoRewardsMatx_safe' combinedChoicesMatx_safe'], combinedAllChoice_R_safe, 'distribution','binomial','link','logit');
+hold on;
+figure; hold on;
+relevInds = 2:tMax+1;
+coefVals = glm_all_safe.Coefficients.Estimate(relevInds);
+CIbands = coefCI(glm_rwdNoRwd_safe);
+errorL = abs(coefVals - CIbands(relevInds,1));
+errorU = abs(coefVals - CIbands(relevInds,2));
+errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'Color', [0.8784    0.6157    0.8627],'linewidth',2)
 % 
 % % if plotFlag
 % 
@@ -181,10 +177,10 @@ glm_rwdNoRwd_safe = fitglm([combinedRewardsMatx_safe' combinedNoRewardsMatx_safe
 % errorU = abs(coefVals - CIbands(relevInds,2));
 % errorbar((1:tMax)+0.2,coefVals,errorL,errorU,'b','linewidth',2)
 % 
-% xlabel('Reward n Trials Back')
-% ylabel('\beta Coefficient')
-% xlim([0.5 tMax+0.5])
-% legend('rwd', 'no rwd')
-% title([animal ' ' category])
+xlabel('all Trials Back')
+ylabel('\beta Coefficient')
+xlim([0.5 tMax+0.5])
+legend('choice reward no reward')
+title([animal ' ' category])
 % % end
 
