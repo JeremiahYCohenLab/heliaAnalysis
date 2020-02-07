@@ -84,7 +84,7 @@ for i = 1: length(dayList)
     stateSwitchInd_threat = [];
     stateSwitchInd_threat = [stateSwitchInd_threat find(~isnan(stateSwitchInd_threatTmp))]; 
     
-    if(behSessionData(length(responseInds)).stateType == 1)
+    if(behSessionData(responseInds).stateType == 1)
         stateSwitchInd_threat = [stateSwitchInd_threat length(responseInds)];
     end
 
@@ -124,29 +124,26 @@ for i = 1: length(dayList)
             noRwdMatxTmp_threat = [];
             airpuffMatxTmp = [];
     %         allRewards_threat
-             for l = 1: length(stateSwitchInd_threat)-1
+             for l = 1: length(stateSwitchInd_safe)-1
                 rwdMatxTmp_threat = [];
                 choiceMatxTmp_threat = [];
                 noRwdMatxTmp_threat = [];
                 airpuffMatxTmp = [];
-                if(stateSwitchInd_threatTmp(stateSwitchInd_threat(l+1)) ~=0 && stateSwitchInd_threatTmp(stateSwitchInd_threat(l)) ~= 0)
+                if(stateSwitchInd_safeTmp(stateSwitchInd_threat(l+1)) ~=0 && stateSwitchInd_safeTmp(stateSwitchInd_threat(l)) ~= 0)
                     if (length(stateSwitchInd_threat(l):stateSwitchInd_threat(l+1))> tMax)
                         for j = 1:tMax
-                            rwdMatxTmp_threat(j,:) = [NaN(1,j) allRewards_threat(stateSwitchInd_threat(l):stateSwitchInd_threat(l+1)-j)];
-                            choiceMatxTmp_threat(j,:) = [NaN(1,j) allChoices_threat(stateSwitchInd_threat(l):stateSwitchInd_threat(l+1)-j)];
-                            noRwdMatxTmp_threat(j,:) = [NaN(1,j) allNoRewards_threat(stateSwitchInd_threat(l):stateSwitchInd_threat(l+1)-j)];
+                            rwdMatxTmp_threat(j,:) = [NaN(1,j) allRewards(stateSwitchInd_threat(l):stateSwitchInd_threat(l+1)-j)];
+                            choiceMatxTmp_threat(j,:) = [NaN(1,j) allChoices(stateSwitchInd_threat(l):stateSwitchInd_threat(l+1)-j)];
+                            noRwdMatxTmp_threat(j,:) = [NaN(1,j) allNoRewards(stateSwitchInd_theat(l):stateSwitchInd_threat(l+1)-j)];
                         end
                     end
                    combinedRewardsMatx_threat_state = [combinedRewardsMatx_threat_state NaN(tMax, 15) rwdMatxTmp_threat];
                    combinedNoRewardsMatx_threat_state = [combinedNoRewardsMatx_threat_state NaN(tMax,15) noRwdMatxTmp_threat];       
                    combinedChoicesMatx_threat_state = [combinedChoicesMatx_threat_state NaN(tMax,15) choiceMatxTmp_threat];
 %                    combinedTimesMatx_threat_state = [combinedTimesMatx_threat_state NaN(tMax, 100) timeTmp_threat];
-                   combinedAllChoice_R_threat_state = [combinedAllChoice_R_threat_state NaN(1,15) allChoice_R_threat(:,stateSwitchInd_threat(l):stateSwitchInd_threat(l+1))];
+                   combinedAllChoice_R_threat_state = [combinedAllChoice_R_threat_state NaN(1,15) allChoice_R(:,stateSwitchInd_threat(l):stateSwitchInd_threat(l+1))];
                 end
-             end
-    combinedRewardsMatx_threat = [combinedRewardsMatx_threat NaN(tMax,100) combinedRewardsMatx_threat_state];
-    combinedNoRewardsMatx_threat = [combinedNoRewardsMatx_threat NaN(tMax,100) combinedNoRewardsMatx_threat_state];
-    combinedAllChoice_R_threat = [combinedAllChoice_R_threat NaN(1,100) combinedAllChoice_R_threat_state];
+            end
 end
 %logistic regression models
 % glm_rwd = fitglm([combinedRewardsMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
