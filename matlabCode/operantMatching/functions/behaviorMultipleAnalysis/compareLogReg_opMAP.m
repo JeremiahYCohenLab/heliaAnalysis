@@ -1,4 +1,4 @@
-function [glm_rwdNoRwd_safe, glm_rwdNoRwd_threat] = compareLogReg_opMAP(file, animal, category, revForFlag, trialFlag)
+function [glm_rwdNoRwd_safe, glm_rwdNoRwd_threat, tMax] = compareLogReg_opMAP(file, animal, category, revForFlag, trialFlag)
 
 if nargin < 5
     trialFlag = 0;
@@ -9,11 +9,11 @@ end
 
 %run function to generate lrm
   if trialFlag
-    [glm_rwdNoRwd_safe, tMax]= combineStates_opMAP(file, animal,category, revForFlag);
-    [glm_rwdNoRwd_threat, ~]= combineStates_threat_opMAPP(file, animal,category, revForFlag);
+    [glm_rwdNoRwd_safe, glm_rwdNoRwd_threat, tMax]= combineStates_opMAPP(file, animal,category, revForFlag);
+%     [glm_rwdNoRwd_threat, ~]= combineStates_threat_opMAPP(file, animal,category, revForFlag);
  else
-    [glm_rwdNoRwd_safe, s]= combineLogRegTime_safe_opMAP(file, animal, category, revForFlag);
-    [glm_rwdNoRwd_threat,~]= combineLogRegTime_threat_opMAP(file, animal, category, revForFlag);
+    [glm_rwdNoRwd_safe,glm_rwdNoRwd_threat, s]= combineLogRegStatesTime_opMAP(file, animal, category, revForFlag);
+%     [glm_rwdNoRwd_threat,~]= combineLogRegTime_threat_opMAP(file, animal, category, revForFlag);
     tMax = s.tMax;
  end
 
