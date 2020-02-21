@@ -154,16 +154,16 @@ for i = 1: length(dayList)
                 noRwdTempMatx(:,j) = 0;
             end
         end
-        for currrT = 1:length(stateChangeInds)-1
+        for currT = 1:length(stateChangeInds)-1
             rwdMatx_safe_states =[]; 
             noRwdMatx_safe_states = [];
             combinedAllChoice_R_safe_states = [];
             rwdMatx_threat_states =[]; %these go back to being empty for the next day
             noRwdMatx_threat_states = [];
             combinedAllChoice_R_threat_states = [];
-             if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 12)
-                if stateType(stateChangeInds(currT-1)) == 1
-%                     rwdTempMatx_threat(:,1) = NaN;
+             if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 10)
+                if stateType(stateChangeInds(currT)) == 1
+                    rwdTempMatx_threat(:,1) = NaN;
                     rwdMatx_threat_states = [rwdMatx_threat_states NaN(length(timeBinEdges)-1,15) rwdTempMatx(:,stateChangeInds(currT):stateChangeInds(currT+1)-1)]; %these are the matrices of each state
                     noRwdMatx_threat_states = [noRwdMatx_threat_states NaN(length(timeBinEdges)-1, 15) noRwdTempMatx(:,stateChangeInds(currT):stateChangeInds(currT+1)-1)];
                     combinedAllChoice_R_threat_states = [combinedAllChoice_R_threat_states NaN(1,15) allChoice_R(:,stateChangeInds(currT):stateChangeInds(currT+1)-1)]; 

@@ -9,12 +9,12 @@ end
 [root, sep] = currComputer();
 
 
-rwdRateMatx_threat = [];
-combinedChoicesMatx_threat = []; 
-combinedRewardsMatx_threat = [];
-combinedNoRewardsMatx_threat = [];
-combinedTimesMatx_threat = [];
-combinedAllChoice_R_threat = [];
+rwdRateMatx = [];
+combinedChoicesMatx = []; 
+combinedRewardsMatx = [];
+combinedNoRewardsMatx = [];
+combinedTimesMatx = [];
+combinedAllChoice_R = [];
 responseInds_threat = [];
 responseInds = [];
 combinedAirpuff = [];
@@ -59,71 +59,70 @@ for i = 1: length(dayList)
     
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
     omitInds = isnan([behSessionData.rewardTime]); 
-    responseInds_threat = find([behSessionData.stateType] == 1);
-    allAirpuff = NaN(1,length(behSessionData(responseInds_threat)));
-    allAirpuffInd = [behSessionData(responseInds_threat).AirpuffTimeOn];
+    stateType = [behSessionData(responseInds).stateType];
+    stateChangeInds = [1 (find(abs(diff([behSessionData(responseInds).stateType])) == 1) + 1) length(responseInds)];
+    allAirpuff = NaN(1,length(behSessionData(responseInds)));
+    allAirpuffInd = [behSessionData(responseInds).AirpuffTimeOn];
     allAirpuff(~allAirpuffInd == 0) = 1;
     allAirpuff(isnan(allAirpuff)) = 0;
-%     allAirpuff(~isnan(allAirpuff)) = 1;
-%     allAirpuff(isnan(allAirpuff)) = 0;
-    allReward_R_threat = [behSessionData(responseInds_threat).rewardR];
-    allReward_L_threat = [behSessionData(responseInds_threat).rewardL]; 
-    allChoices_threat = NaN(1,length(behSessionData(responseInds_threat)));
-    allChoices_threat(~isnan(allReward_R_threat)) = 1;
-    allChoices_threat(~isnan(allReward_L_threat)) = -1;
+    allReward_R = [behSessionData(responseInds).rewardR];
+    allReward_L = [behSessionData(responseInds).rewardL]; 
+    allChoices = NaN(1,length(behSessionData(responseInds)));
+    allChoices(~isnan(allReward_R)) = 1;
+    allChoices(~isnan(allReward_L)) = -1;
 
-    allReward_R_threat(isnan(allReward_R_threat)) = 0;
-    allReward_L_threat(isnan(allReward_L_threat)) = 0;
-    allChoice_R_threat = double(allChoices_threat == 1);
-    allChoice_L_threat = double(allChoices_threat == -1);
+    allReward_R(isnan(allReward_R)) = 0;
+    allReward_L(isnan(allReward_L)) = 0;
+    allChoice_R = double(allChoices == 1);
+    allChoice_L = double(allChoices == -1);
 
-    allRewards_threat = zeros(1,length(allChoices_threat));
-    allRewards_threat(logical(allReward_R_threat)) = 1;
-    allRewards_threat(logical(allReward_L_threat)) = -1;
+    allRewards = zeros(1,length(allChoices));
+    allRewards(logical(allReward_R)) = 1;
+    allRewards(logical(allReward_L)) = -1;
 
-    allNoRewards_threat = allChoices_threat;
-    allNoRewards_threat(logical(allReward_R_threat)) = 0;
-    allNoRewards_threat(logical(allReward_L_threat)) = 0;
+    allNoRewards = allChoices;
+    allNoRewards(logical(allReward_R)) = 0;
+    allNoRewards(logical(allReward_L)) = 0;
 
-    outcomeTimes_threat = [behSessionData(responseInds_threat).rewardTime] - behSessionData(responseInds(1)).rewardTime;
-    outcomeTimes_threat = [diff(outcomeTimes_threat) NaN];
-
-    rwdMatxTmp_threat = [];
     choiceMatxTmp_threat = [];
     noRwdMatxTmp_threat = [];
     airpuffMatxTmp = [];
-        
-    for j = 1:tMax
-        rwdMatxTmp_threat(j,:) = [NaN(1,j) allRewards_threat(1:end-j)];
-        choiceMatxTmp_threat(j,:) = [NaN(1,j) allChoices_threat(1:end-j)];
-        noRwdMatxTmp_threat(j,:) = [NaN(1,j) allNoRewards_threat(1:end-j)];
-        airpuffMatxTmp (j,:) = [NaN(1,j) allAirpuff(1:end-j)];
-    end
-
-    timeTmp_threat = NaN(tMax,length(allRewards_threat)); 
-    for j = 1:tMax
-        for k = 1:length(outcomeTimes_threat)-j
-            timeTmp_threat(j,k+j) = sum(outcomeTimes_threat(k:k+j-1));
-        end
-            
+        for currT = 1:length(stateChangeInds)-1
+         if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 12)
+            if stateType(stateChangeInds(currT)) == 1
+                rwdMatxTmp_threat = []; %will make an upper triangle matrix
+                for j = 1:tMax
+                    rwdMatxTmp_threat(j,:) = [NaN(1,j) allRewards(stateChangeInds(currT):stateChangeInds(currT+1)-1-j)];
+                    choiceMatxTmp_threat(j,:) = [NaN(1,j) allChoices(stateChangeInds(currT):stateChangeInds(currT+1)-1-j)];
+                    noRwdMatxTmp_threat(j,:) = [NaN(1,j) allNoRewards(stateChangeInds(currT):stateChangeInds(currT+1)-1-j)];
+                end
+                combinedRewardsMatx_threat_state = [combinedRewardsMatx_threat_state NaN(tMax,15) rwdMatxTmp_threat(:,1:end-1)];
+            end
+         end
+    for currT = 1:length(stateChangeInds)-1   %% determine lick latency for stay v switch trials for safe and threat sepearetaly
+         if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 12)
+            if stateType(stateChangeInds(currT)) == 1 %plus 2 to not look at the first lick lat
+                combinedAirpuff_state = [combinedAirpuff_state NaN(1,15) allAirpuff(stateChangeInds(currT)+1:stateChangeInds(currT+1)-1)];
+            end
+         end
     end
     
-%    allRewards(allRewards == -1) = 1;
+   allRewards(allRewards == -1) = 1;
  
-    rwdsTmp_threat = NaN(tMax,length(allRewards_threat)); 
+    rwdsTmp = NaN(tMax,length(allRewards)); 
     for j = 1:tMax
         for k = 1:length(outcomeTimes_threat)-j
-             rwdsTmp_threat(j,k+j) = sum(allRewards_threat(k:k+j-1));
+             rwdsTmp(j,k+j) = sum(allRewards(k:k+j-1));
         end
     end
     
-    rwdRateMatx_threat = [rwdRateMatx_threat NaN(tMax, 100) (rwdsTmp_threat ./ timeTmp_threat)];
-    combinedRewardsMatx_threat = [combinedRewardsMatx_threat NaN(tMax,100) rwdMatxTmp_threat];
-    combinedNoRewardsMatx_threat = [combinedNoRewardsMatx_threat NaN(tMax,100) noRwdMatxTmp_threat];
-    combinedChoicesMatx_threat = [combinedChoicesMatx_threat NaN(tMax,100) choiceMatxTmp_threat];
-    combinedTimesMatx_threat = [combinedTimesMatx_threat NaN(tMax, 100) timeTmp_threat];
-    combinedAllChoice_R_threat = [combinedAllChoice_R_threat NaN(1,100) allChoice_R_threat];
-    combinedAirpuff = [combinedAirpuff NaN(tMax,100) airpuffMatxTmp];
+    rwdRateMatx = [rwdRateMatx NaN(tMax, 100) (rwdsTmp ./ timeTmp)];
+    combinedRewardsMatx = [combinedRewardsMatx NaN(tMax,100) rwdMatxTmp_threat];
+    combinedNoRewardsMatx = [combinedNoRewardsMatx NaN(tMax,100) noRwdMatxTmp_threat];
+    combinedChoicesMatx = [combinedChoicesMatx NaN(tMax,100) choiceMatxTmp_threat];
+    combinedTimesMatx = [combinedTimesMatx NaN(tMax, 100) timeTmp];
+    combinedAllChoice_R = [combinedAllChoice_R NaN(1,100) allChoice_R];
+    combinedAirpuff = [combinedAirpuff NaN(tMax,100) combinedAirpuff_state];
 end
 
 
@@ -137,15 +136,15 @@ end
 % glm_rwdNoRwd = fitglm([combinedRewardsMatx' combinedNoRewardsMatx'], combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{7} = num2str(round(glm_rwdNoRwd.Rsquared.Adjusted*100)/100);
 % glm_all = fitglm([combinedRewardsMatx' combinedNoRewardsMatx' combinedChoicesMatx'], combinedAllChoice_R, 'distribution','binomial','link','logit');
 % hold on;
-glm_rwd_threat = fitglm([combinedRewardsMatx_threat]', combinedAllChoice_R_threat,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd_threat.Rsquared.Adjusted*100)/100);
-glm_choice_threat = fitglm([combinedChoicesMatx_threat]', combinedAllChoice_R_threat, 'distribution','binomial','link','logit'); rsq{3} = num2str(round(glm_choice_threat.Rsquared.Adjusted*100)/100);
-glm_rwdANDchoice_threat = fitglm([combinedRewardsMatx_threat' combinedChoicesMatx_threat'], combinedAllChoice_R_threat, 'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwdANDchoice_threat.Rsquared.Adjusted*100)/100);
-glm_time_threat = fitglm([combinedTimesMatx_threat]', combinedAllChoice_R_threat,'distribution','binomial','link','logit'); rsq{4} = num2str(round(glm_time_threat.Rsquared.Adjusted*100)/100);
-glm_rwdANDtime_threat = fitglm([combinedRewardsMatx_threat' combinedTimesMatx_threat'], combinedAllChoice_R_threat,'distribution','binomial','link','logit'); rsq{5} = num2str(round(glm_rwdANDtime_threat.Rsquared.Adjusted*100)/100);
-glm_rwdRate_threat = fitglm([rwdRateMatx_threat]', combinedAllChoice_R_threat,'distribution','binomial','link','logit'); rsq{6} = num2str(round(glm_rwd_threat.Rsquared.Adjusted*100)/100);
-glm_rwdNoRwd_threat = fitglm([combinedRewardsMatx_threat' combinedNoRewardsMatx_threat'], combinedAllChoice_R_threat,'distribution','binomial','link','logit'); rsq{7} = num2str(round(glm_rwdNoRwd_threat.Rsquared.Adjusted*100)/100);
-glm_all_threat = fitglm([combinedRewardsMatx_threat' combinedNoRewardsMatx_threat' combinedChoicesMatx_threat'], combinedAllChoice_R_threat, 'distribution','binomial','link','logit');
-glm_AirpuffANDchoice =  fitglm([combinedAirpuff'], combinedAllChoice_R_threat,'distribution','binomial','link','logit'); rsq{7} = num2str(round(glm_AirpuffANDchoice.Rsquared.Adjusted*100)/100);
+glm_rwd_threat = fitglm([combinedRewardsMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd_threat.Rsquared.Adjusted*100)/100);
+glm_choice_threat = fitglm([combinedChoicesMatx]', combinedAllChoice_R, 'distribution','binomial','link','logit'); rsq{3} = num2str(round(glm_choice_threat.Rsquared.Adjusted*100)/100);
+glm_rwdANDchoice_threat = fitglm([combinedRewardsMatx' combinedChoicesMatx'], combinedAllChoice_R, 'distribution','binomial','link','logit'); rsq{2} = num2str(round(glm_rwdANDchoice_threat.Rsquared.Adjusted*100)/100);
+glm_time_threat = fitglm([combinedTimesMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{4} = num2str(round(glm_time_threat.Rsquared.Adjusted*100)/100);
+glm_rwdANDtime_threat = fitglm([combinedRewardsMatx' combinedTimesMatx'], combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{5} = num2str(round(glm_rwdANDtime_threat.Rsquared.Adjusted*100)/100);
+glm_rwdRate_threat = fitglm([rwdRateMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{6} = num2str(round(glm_rwd_threat.Rsquared.Adjusted*100)/100);
+glm_rwdNoRwd_threat = fitglm([combinedRewardsMatx' combinedNoRewardsMatx'], combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{7} = num2str(round(glm_rwdNoRwd_threat.Rsquared.Adjusted*100)/100);
+glm_all_threat = fitglm([combinedRewardsMatx' combinedNoRewardsMatx' combinedChoicesMatx'], combinedAllChoice_R, 'distribution','binomial','link','logit');
+glm_AirpuffANDchoice =  fitglm([combinedAirpuff'], combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{7} = num2str(round(glm_AirpuffANDchoice.Rsquared.Adjusted*100)/100);
 
 figure; hold on;
 relevInds = 2:tMax+1;

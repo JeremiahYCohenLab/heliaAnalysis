@@ -2,18 +2,15 @@ function [glm_rwdLickSafe, glm_rwdLickThreat] = compareLogRegLickStates_opMAP(fi
 
 if nargin < 5
     trialFlag = 0;
-    revForFlag = 0;
 end
 
 %run function to generate lrm 
 if trialFlag
-    [glm_rwdLickSafe, safeStayLickLat, safeSwitchLickLat, tMax]= combineLogRegLickLatSafe_opMAP(file, animal, category, 'revForFlag', revForFlag);
-    [glm_rwdLickThreat, threatStayLickLat, threatSwitchLickLat, ~]= combineLogRegLickLatThreat_opMAP(file, animal, category, 'revForFlag', revForFlag);
+    [glm_rwdLickSafe, glm_rwdLickThreat, StayLickLat_safe, SwitchLickLat_safe, StayLickLat_threat, SwitchLickLat_threat, tMax] = combineLogRegLickLatStates_opMAP(file, animal, category, revForFlag);
 else
-    [glm_rwdLickSafe, safeStayLickLat, safeSwitchLickLat, binSize, timeMax]= combineLogRegLickLatSafeTime_opMAP(file, animal, category, 'revForFlag', revForFlag);
-    [glm_rwdLickThreat, threatStayLickLat, threatSwitchLickLat, ~, ~]= combineLogRegLickLatTime_opMD(file, animal, category, 'revForFlag', revForFlag);
-    timeBinEdges = [1000:binSize:timeMax];
-    tMax = length(timeBinEdges) - 1;
+    [glm_rwdLickSafe, glm_rwdLickThreat, StayLickLat_safe, SwitchLickLat_safe, StayLickLat_threat, SwitchLickLat_threat,  binSize, timeMax, tMax] = combineLogRegLickLatStatesTime_opMAP(file, animal, category, revForFlag);
+%     timeBinEdges = [1000:binSize:timeMax];
+      
 end
 
 
@@ -38,8 +35,8 @@ if trialFlag
     errorbar([1:tMax],coefVals,errorL,errorU,'Color', [255,255,0]./255,'linewidth',2)
     xlabel('Reward n trials back')
 else
-    errorbar(((1:timeMax)*binSize/1000),coefVals,errorL,errorU,'Color', [255,255,0]./255,'linewidth',2)
-    xlim([0 (timeMax*binSize/1000 + binSize/1000)])
+    errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [255,255,0]./255,'linewidth',2)
+    xlim([0 (tMax*binSize/1000 + 5)])
     xlabel('Reward n seconds back')
 end
 title('LRM - Rewards on Licks')
@@ -49,33 +46,31 @@ ylabel('\beta Coefficient')
 
 
 figure;
-mag = [1 0 1];
-cyan = [0 1 1];
-set(gcf,'defaultAxesColorOrder',[[255,204,255]./255; [255,255,0]./255]);
+% set(gcf,'defaultAxesColorOrder',[[255,204,255]./255; [255,255,0]./255]);
 
 subplot(2,2,1)
-yyaxis left; histogram(safeStayLickLat, 30, 'Normalization', 'probability')
-yyaxis right; histogram(threatStayLickLat, 30, 'Normalization', 'probability')
+yyaxis left; histogram(StayLickLat_safe, 30, 'Normalization', 'probability', 'Facecolor', [255,204,255]./255)
+yyaxis right; histogram(StayLickLat_threat, 30, 'Normalization', 'probability', 'FaceColor', [255,255,0]./255)
 legend('safe', 'threat')
 title('stay lick latency')
 
 subplot(2,2,2)
-yyaxis left; histogram(safeSwitchLickLat, 30, 'Normalization', 'probability')
-yyaxis right; histogram(threatSwitchLickLat, 30, 'Normalization', 'probability')
+yyaxis left; histogram(SwitchLickLat_safe, 30, 'Normalization', 'probability','Facecolor', [255,204,255]./255)
+yyaxis right; histogram(SwitchLickLat_threat, 30, 'Normalization', 'probability','FaceColor', [255,255,0]./255)
 legend('safe', 'threat')
 title('switch lick latency')
 
 subplot(2,2,3)
-yyaxis left; histogram(safeStayLickLat, 30, 'Normalization', 'probability')
-yyaxis right; histogram(safeSwitchLickLat, 30, 'Normalization', 'probability')
+yyaxis left; histogram(StayLickLat_safe, 30, 'Normalization', 'probability', 'Facecolor',[58,199,199]./255)
+yyaxis right; histogram(SwitchLickLat_safe, 30, 'Normalization', 'probability','Facecolor', [255,204,255]./255)
 legend('stay', 'switch')
-title('pre lick latency')
+title('safe lick latency')
 
 subplot(2,2,4)
-yyaxis left; histogram(threatStayLickLat, 30, 'Normalization', 'probability')
-yyaxis right; histogram(threatSwitchLickLat, 30, 'Normalization', 'probability')
+yyaxis left; histogram(StayLickLat_threat, 30, 'Normalization', 'probability','Facecolor',  [58,199,199]./255)
+yyaxis right; histogram(SwitchLickLat_threat, 30, 'Normalization', 'probability', 'Facecolor', [200,200,0]./255)
 legend('stay', 'switch')
-title('post lick latency')
+title('threat lick latency')
 
 
 suptitle(animal)
