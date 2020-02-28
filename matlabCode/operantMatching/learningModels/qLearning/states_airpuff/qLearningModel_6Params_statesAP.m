@@ -16,7 +16,7 @@ Q = zeros(trials,2);
 
 % Call learning rule
 for t = 1 : (trials-1)
-    if stateType ==0 
+    if stateType(t) ==0 
         if choice(t, 1) == 1 % right choice   
             Q(t+1, 2) = alphaForget*Q(t, 2);  %%%should this be two parameters for two different state?
 %           Q(t+1, 1) = alphaForget*Q(t, 1) + alphaLearn * (outcome(t, 1) - Q(t, 1));

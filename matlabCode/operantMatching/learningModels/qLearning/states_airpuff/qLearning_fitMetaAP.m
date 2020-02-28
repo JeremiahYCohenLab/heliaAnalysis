@@ -10,25 +10,27 @@ p.addParameter('category', [])
 p.parse(varargin{:});
 
 
+
 if ~isempty(p.Results.mouse)
     behavStruct = parseBehavioralData_multipleAP(filename, p.Results.mouse, p.Results.category, p.Results.revForFlag);
 else
     [behSessionData, blockSwitch, stateSwitch, outputPathStruct] = loadBehavioralDataAP(filename, p.Results.revForFlag);
-    behavStruct = parseBehavioralDataAP(behSessionData, unCorrectedBlockSwitch);
+    behavStruct = parseBehavioralDataAP(behSessionData, blockSwitch);
 end
 
 
-outcome_threat = abs([behavStruct.allReward_R_ap; behavStruct.allReward_L_ap])';
-choice_threat = abs([behavStruct.allChoice_R_ap; behavStruct.allChoice_L_ap])';
-ITI_threat = [behavStruct.timeBtwn_ap]';
-outcome_safe = abs([behavStruct.allReward_R; behavStruct.allReward_L])';
-choice_safe = abs([behavStruct.allChoice_R; behavStruct.allChoice_L])';
-ITI_safe = [behavStruct.timeBtwn]';
+outcome = abs([behavStruct.allReward_R; behavStruct.allReward_L])';
+choice = abs([behavStruct.allChoice_R; behavStruct.allChoice_L])';
+ITI = [behavStruct.timeBtwn]';
+stateType = [behavStruct.stateType];
+% outcome_safe = abs([behavStruct.allReward_R; behavStruct.allReward_L])';
+% choice_safe = abs([behavStruct.allChoice_R; behavStruct.allChoice_L])';
+% ITI_safe = [behavStruct.timeBtwn]';
 
 
 % Initialize models
 modelNames = {'qLearningModel_6Params_statesAP'};
-startValueCSVs = {'qlearning_6Param_states_startValues.cvs'};
+startValueCSVs = {'qlearningModel_6Params_states_startValues.csv'};
 
 
 
@@ -76,7 +78,7 @@ for currMod = 1:length(modelNames)
            -alphaNPE_range(1); alphaNPE_range_threat(1); -alphaPPE_range(1); alphaPPE_range_threat(1); -alphaForget_range(1); -beta_range(1)];
         parfor r = 1:runs
             [allParams(r, :), LH(r, :), exitFl(r, :), ~, ~, ~, hess(r, :, :)] = ...
-                fmincon(@qLearningModel_6Params_statesAP, startValues(r,:), A, b, [], [], [], [], [], options, choice, outcome);
+                fmincon(@qLearningModel_6Params_statesAP, startValues(r,:), A, b, [], [], [], [], [], options, choice, outcome, stateType);
         end
         [~,bestFit] = min(LH);
         model.(modelNames{currMod}).bestParams = allParams(bestFit, :);

@@ -10,6 +10,7 @@ if ~isempty(strfind(fileOrFolder,'.asc')) % input is .asc file
     filename = fileOrFolder;
     [animalName, date] = strtok(filename, 'd'); 
     animalName = animalName(2:end);
+    sessionName = fileOrFolder;
     date = date(1:9);
     sessionFolder = ['m' animalName date];
     behavioralDataPath = [root animalName sep sessionFolder sep 'behavior' sep filename];
@@ -19,6 +20,7 @@ else % input is the folder
     sessionFolder = fileOrFolder;
     animalName = strtok(sessionFolder, 'd');
     animalName = animalName(2:end);
+    sessionName = fileOrFolder;
     filepath = [root animalName sep sessionFolder sep 'behavior' sep];
     allFiles = dir(filepath);
     fileInd = ~cellfun(@isempty,strfind({allFiles.name},'.asc'));
@@ -27,7 +29,7 @@ else % input is the folder
     saveFigName = sessionFolder(~(sessionFolder==sep));
 end
 
-if isstrprop(sessionName(end), 'alpha')
+if isstrprop(fileOrFolder(end), 'alpha')
     sortedFolderLocation = [root animalName sep sessionFolder sep 'sorted' sep 'session ' suptitleName(end) sep];
 else
     sortedFolderLocation = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep];

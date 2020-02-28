@@ -66,7 +66,8 @@ for i = 1: length(dayList)
             timeBtwn = [[behSessionData(2:end).rewardTime] - [behSessionData(1:end-1).CSon]];
             timeBtwn(timeBtwn < 0 ) = 0;
             timeBtwn = [0 timeBtwn(~isnan(timeBtwn))/1000];
-         if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 12)
+       for currT = 1:length(stateChangeInds)-1
+%          if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 12)
             if stateType(stateChangeInds(currT)) == 1
                 combinedAllReward_R_ap = [combinedAllReward_R_ap 2 allReward_R(stateChangeInds(currT):stateChangeInds(currT+1)-1)]; %2 is used as an indicator to RL models to reset Q values
                 combinedAllReward_L_ap = [combinedAllReward_L_ap 2 allReward_L(stateChangeInds(currT):stateChangeInds(currT+1)-1)];
@@ -80,7 +81,8 @@ for i = 1: length(dayList)
                 combinedAllChoice_L = [combinedAllChoice 2 allChoice_L(stateChangeInds(currT):stateChangeInds(currT+1)-1)];
                 combinedTimeBtwn = [combinedTimeBtwn 2 timeBtwn(stateChangeInds(currT):stateChangeInds(currT+1)-1)];
             end
-         end
+%          end
+       end
 end
 
 %% Convert to outputStruct

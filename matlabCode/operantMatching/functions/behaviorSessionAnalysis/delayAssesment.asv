@@ -57,7 +57,7 @@ for i = 1:length(sessionText)
         delayHappened = 0; 
     end
 end
-allrewar(~isnan(behSessionData.licksL)r
+allrewar(~isnan(behSessionData.licksL)
 % scatter(delayMatx(1,:), behSessionData.rewardR); %correlation between right reward and delay
 
 figure; hold on;

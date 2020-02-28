@@ -1,7 +1,7 @@
 function createStartValuesAP(filename, paramRanges) 
 
 if nargin < 2 
-    paramRanges = [0.1 1; 0.1 1; 0.1 1; 0.1 1; 1 5; 0 1];
+    paramRanges = [0.1 1; 0.1 1; 0.1 1; 0.1 1; 0.1 1 ; 1 9];
 end
     
 for i = 1:length(paramRanges)
