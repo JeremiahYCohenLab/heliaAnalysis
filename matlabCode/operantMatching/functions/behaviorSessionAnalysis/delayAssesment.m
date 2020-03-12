@@ -15,7 +15,7 @@ delayHappened = 0;
 % delayHappened = zeros(length(behSessionData),1);
 delayTime = [];
 delayMatx = [];
-allLick_R = find(~isnan([behSessionData.rewardTime]));
+% allLick_R = find(~isnan([behSessionData.rewardTime]));
 
 for i = 1:length(sessionText)
     if ~isempty(strfind(sessionText{i}, 'Delayed'))
@@ -57,8 +57,8 @@ for i = 1:length(sessionText)
         delayHappened = 0; 
     end
 end
-allrewar(~isnan(behSessionData.licksL)r
-% scatter(delayMatx(1,:), behSessionData.rewardR); %correlation between right reward and delay
+% allLicls_L(~isnan(behSessionData(1:end).licksL)) = size(behSessionData(1:end).licksL);
+
 
 figure; hold on;
 set(gcf, 'Position', get(0,'Screensize'))
