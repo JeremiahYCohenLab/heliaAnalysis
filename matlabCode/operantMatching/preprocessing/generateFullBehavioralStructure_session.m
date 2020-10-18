@@ -1,21 +1,21 @@
-tic
+function [fs_b]  = generateFullBehavioralStructure_session(SaveData_Flag)
+
 behavStruct = [];
 
 workbookFile = 'C:\Users\Helia\Documents\dataFullstructure\oM_behavior.xlsx';
 [~, allAnimals] = xlsfinfo(workbookFile);
 for currA = 1:length(allAnimals)
-    behavTable = importExcelData_behavior_oM(workbookFile, allAnimals{currA});
-    usableDates = behavTable.usable ~= 0;
-    behavTable = behavTable(usableDates, :);
+    behavTable = importExcelData_behavior_om(workbookFile, allAnimals{currA});
+%     usableDates = behavTable.usable ~= 0;
+%     behavTable = behavTable(usableDates, :);
     for currS = 1:height(behavTable)
-        sessionName = ['m' char(allAnimals{currA}) 'd' char(behavTable.session(currS))];
-        os = loadBehavioralData_oM(sessionName, 'OverrideBehavioralMatFile', true);
-        behavStruct.(allAnimals{currA}).(strrep(sessionName,'\','')) = os;
+        sessionName = ['m' char(behavTable.session(currS))];
+        os = loadBehavioralData_om(sessionName, 'OverrideBehavioralMatFile', true);
+%         behavStruct.(allAnimals{currA}).(strrep(sessionName,'\','')) = os;
     end
 end
 
 save('C:\Users\Helia\Documents\dataFullstructure\behavStruct.mat','behavStruct')
-toc
 
 %%
 numTrials = 0;

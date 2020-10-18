@@ -1,4 +1,4 @@
-function [sessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName)
+function [sessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingTraining(sessionName)
 
 % Determine if computer is PC or Mac and set roots and separators appropriately
 [root, sep] = currComputer();
@@ -6,7 +6,6 @@ function [sessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionDa
 animalName = animalName(2:end);
 date = date(1:9);
 sessionFolder = ['m' animalName date];
-
 
 
 behavioralDataPath = [root animalName sep sessionFolder sep 'behavior' sep sessionName '.asc'];
@@ -27,8 +26,7 @@ sessionData.AirpuffTimeOn = [];
 sessionData.AirpuffTimeOff = [];
 sessionData.lickAfterpuff = [];
 sessionData.autopause = [];
-sessionData.ManulWaterR = [];
-sessionData.ManulWaterL = [];
+sessionData.delayNlw = [];
 
 
 blockSwitch = 1;
@@ -76,6 +74,7 @@ for i = 1:length(sessionText)
             sessionData(1).stateType = 0; %starts with state 0/safe
         end  
         waterDeliverFlag = false;
+        DoneManual = false;
         allL_licks = [];
         allR_licks = [];
         for currTrialInd = tBegin:tEnd
@@ -149,6 +148,18 @@ for i = 1:length(sessionText)
                     waterDeliverFlag = true;
                 end
             end
+            if (~DoneManual)
+                if strfind(sessionText{currTrialInd},'L port - Manual Water Delivered') 
+                       temp = regexp(sessionText(currTrialInd), ': ', 'split');
+                       sessionData(currTrial).ManulWaterL = str2double(temp{1}{2});
+                       DoneManual = true;
+                end
+                if strfind(sessionText{currTrialInd},'R port - Manual Water Delivered')
+                        temp = regexp(sessionText(currTrialInd), ': ', 'split');
+                        sessionData(currTrial).ManulWaterR = str2double(temp{1}{2});
+                        DoneManual = true;
+                end
+            end
             if currTrialInd == tEnd % run this at the last index || currTrialInd == length(sessionText)-1
                 sessionData(currTrial).licksL = allL_licks;
                 sessionData(currTrial).licksR = allR_licks;
@@ -159,6 +170,10 @@ for i = 1:length(sessionText)
                     sessionData(currTrial).rewardL = NaN;
                     sessionData(currTrial).rewardR = NaN;
                     sessionData(currTrial).rewardTime = NaN;
+                end
+                if ~DoneManual 
+                    sessionData(currTrial).ManulWaterL = NaN;
+                    sessionData(currTrial).ManulWaterR = NaN;
                 end
                 if tEnd ~= length(sessionText)
                     temp = regexp(sessionText(tEnd+1), ': ', 'split');
@@ -172,22 +187,15 @@ for i = 1:length(sessionText)
                     blockSwitch = [blockSwitch currTrial];
                     blockProbs = [blockProbs {sessionText{currTrialInd}(end-4:end)}];
                 end
-            end 
-         end
+            end
+             if ~isempty(strfind(sessionText{currTrialInd},'Delayed'))
+                 temp = regexp(sessionText(currTrialInd), ': ', 'split');
+                 sessionData(currTrial).delayNlw = str2double(temp{1}{2});
+             end
+        end
      end
+   end
 end
-savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sorted' sep 'session' sep];
-if isempty(dir(savepath))
-    mkdir(savepath)
-end
-
-f_IndA = find(behavioralDataPath==sep,1,'last');
-f_IndB = strfind(behavioralDataPath,'.asc');
-filename = behavioralDataPath(f_IndA+1:f_IndB-1);
-
-save([savepath filename '_sessionData_behav.mat'], 'sessionData', 'blockSwitch', 'blockProbs',  'stateSwitch');
-end
-
 function dataOutput = importData_operantMatching(filename, startRow, endRow)
 %IMPORTFILE Import numeric data from a text file as a matrix.
 %   MBB039D20160712 = IMPORTFILE(FILENAME) Reads data from text file
@@ -216,9 +224,8 @@ end
 formatSpec = '%s%[^\n\r]';
 
 %% Open the text file.
-fileID = fopen(filename);
-display(fileID);
-display(filename);
+fileID = fopen(filename,'r');
+
 %% Read columns of data according to format string.
 % This call is based on the structure of the file used to generate this
 % code. If an error occurs for a different file, try regenerating the code

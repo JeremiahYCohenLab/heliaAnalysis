@@ -102,7 +102,7 @@ disp('average rate of delay(1/sec)');
 delayRate2 = 1000/(mean(diff(delayTime)));
 sd_delay = 1000/std(diff(delayTime));
 disp(delayRate2); disp('+/- ('); disp(sd_delay); disp(')') %%*1000 to convert to s
-ratio_delayTrial = length(delayMatx(delayMatx==1))/length(behSessionData);
+ratio_delayTrial = length(delayMatx(delayMatx>=1))/length(behSessionData);
 disp('delay ratio in trial');
 disp(ratio_delayTrial); 
 
