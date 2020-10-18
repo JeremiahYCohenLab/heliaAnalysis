@@ -59,7 +59,7 @@ allRewards = zeros(1, a.Results.maxTrials);
 for currT = 1:p.MaxTrials - 1
     
     % Select action
-        pLeft = 1/(1 + exp(-beta*diff(Q(currT, :))));
+    pLeft = 1/(1 + exp(-beta*diff(Q(currT, :))));
     subplot(qValue_plot)
 %    title(sprintf('Probability of right choice %d%%', round(pLeft*100)))
     if binornd(1, pLeft) == 0 % left choice selected probabilistically

@@ -20,7 +20,8 @@ end
 % elseif strfind(filename, 'LR')
 %     savepath = strcat('C:\Users\cooper_PC\Desktop\githubRepositories\cooperAnalysis\matlabCode\operantMatching\learningModels\qLearning\avgLearningRate\', filename);
 % else
-    savepath = strcat('C:\Users\Helia\Documents\GitHub\heliaAnalysis\matlabCode\operantMatching\learningModels\qLearning\states_airpuff\', filename);
+%     savepath = strcat('C:\Users\Helia\Documents\GitHub\heliaAnalysis\matlabCode\operantMatching\learningModels\qLearning\states_airpuff\', filename);
+    savepath = strcat('/Users/heliaseifikar/Documents/GitHub/matlabCode/operantMatching/learningModels/qLearning/states_airpuff/', filename);
 % end
 
 csvwrite([savepath], startVals)

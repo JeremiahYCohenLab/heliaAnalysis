@@ -23,7 +23,7 @@ else % input is the folder
     allFiles = dir(filepath);
     fileInd = ~cellfun(@isempty,strfind({allFiles.name},'.asc'));
     behavioralDataPath = [filepath allFiles(fileInd).name];
-    suptitleName = allFiles(fileInd).name;
+    sgtitle = allFiles(fileInd).name;
     saveFigName = sessionFolder(~(sessionFolder==sep));
 end
 

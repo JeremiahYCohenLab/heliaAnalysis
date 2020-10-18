@@ -1,7 +1,7 @@
 function [root, sep] = currComputer()
 
 if ismac
-    root = 'heliaseifikar/Documents/heliaData/';
+    root = '/Users/heliaseifikar/Documents/GitHub/heliaData/';
   %  root = '/Volumes/bbari1/';
     sep = '/';
 elseif ispc

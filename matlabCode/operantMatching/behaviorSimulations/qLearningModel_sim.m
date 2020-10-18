@@ -21,6 +21,7 @@ a.parse(varargin{:});
 
 alphaNPE = a.Results.bestParams(1);
 alphaPPE = a.Results.bestParams(2);
+
 if a.Results.tForgetFlag == true
     tForget = a.Results.bestParams(3);
 else

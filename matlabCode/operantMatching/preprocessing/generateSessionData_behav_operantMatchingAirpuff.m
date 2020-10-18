@@ -8,6 +8,7 @@ date = date(1:9);
 sessionFolder = ['m' animalName date];
 
 
+
 behavioralDataPath = [root animalName sep sessionFolder sep 'behavior' sep sessionName '.asc'];
 sessionText = importData_operantMatching(behavioralDataPath);
 
@@ -220,8 +221,9 @@ end
 formatSpec = '%s%[^\n\r]';
 
 %% Open the text file.
-fileID = fopen(filename,'r');
-
+fileID = fopen(filename);
+display(fileID);
+display(filename);
 %% Read columns of data according to format string.
 % This call is based on the structure of the file used to generate this
 % code. If an error occurs for a different file, try regenerating the code

@@ -4,7 +4,7 @@ p = inputParser;
 % default parameters if none given
 p.addParameter('figFlag', 0)
 p.addParameter('testFlag', 0)
-p.addParameter('revForFlag',0)
+p.addParameter('revForFlag',1)
 p.addParameter('mouse',[])
 p.addParameter('category', [])
 p.parse(varargin{:});
@@ -83,7 +83,7 @@ for currMod = 1:length(modelNames)
         [~,bestFit] = min(LH);
         model.(modelNames{currMod}).bestParams = allParams(bestFit, :);
         [~, model.(modelNames{currMod}).probChoice, model.(modelNames{currMod}).Q, model.(modelNames{currMod}).pe] = ...
-            qLearningModel_4params_2learnRates_alphaForget(model.(modelNames{currMod}).bestParams, choice, outcome);
+            qLearningModel_6Params_statesAP(model.(modelNames{currMod}).bestParams, choice, outcome,stateType);
     end
     if strcmp(modelNames{currMod}, 'fiveParams_opponency')
         b=[ alphaNPE_range(2);  alphaPPE_range(2);  alphaForget_range(2); beta_range(2); v_range(2);
@@ -132,7 +132,7 @@ for currMod = 1:length(modelNames)
     model.(modelNames{currMod}).exitFl = exitFl(bestFit, :);
     
     if p.Results.figFlag
-        plot(model.(modelNames{currMod}).probChoice(:,1)/max(model.(modelNames{currMod}).probChoice(:,1)), 'linewidth', 2);
+        plot(model.(modelNames{currMod}).probChoice(:,1)/max(model(modelNames{currMod}).probChoice(:,1)), 'linewidth', 2);
     end
 end
 
@@ -143,7 +143,7 @@ if p.Results.figFlag
     for i = 1:length(choice)
         if choice(i,1) == 1
             if outcome(i,1) == 1
-                plot([i i], [0.8 1], '-k')
+                plot([i i], [0.8 1], '-k'); 
             else
                 plot([i i], [0.8 0.9], '-k')
             end

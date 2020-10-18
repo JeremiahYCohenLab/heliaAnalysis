@@ -1,8 +1,8 @@
 function [behSessionData, blockSwitch, stateSwitch, outputPathStruct] = loadBehavioralDataAP(fileOrFolder, revForFlag)
 
-% if nargin < 2
-%     revForFlag = 0;
-% end
+if nargin < 2
+    revForFlag = 1;
+end
 
 [root, sep] = currComputer();
 
@@ -44,7 +44,7 @@ if any(sessionDataInd) % check if there is a file with suptitleName prefix and _
 % %     end
 else
 % %     if revForFlag
-        [behSessionData, blockSwitch, stateSwitch, ~] = generateSessionData_behav_operantMatchingAirpuff(behavioralDataPath);
+        [behSessionData, blockSwitch, stateSwitch, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
 %     else
 %         [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(suptitleName);
 %     end

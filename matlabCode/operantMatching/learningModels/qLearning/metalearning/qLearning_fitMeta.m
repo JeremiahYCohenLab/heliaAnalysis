@@ -4,7 +4,7 @@ p = inputParser;
 % default parameters if none given
 p.addParameter('figFlag', 0)
 p.addParameter('testFlag', 0)
-p.addParameter('revForFlag',0)
+p.addParameter('revForFlag',1)
 p.addParameter('mouse',[])
 p.addParameter('category', [])
 p.parse(varargin{:});
