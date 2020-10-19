@@ -8,21 +8,22 @@ end
 
 [weights, dayList, ~] = xlsread(xlFile, animal);
 [~,col] = find(~cellfun(@isempty,strfind(dayList, category)) == 1);
-% session = end
-% start = end-daysBack  figure category first
-% dayList = dayList(2:end,col);
-endInd = find(cellfun(@isempty,dayList),1);
-if ~isempty(endInd)
-    dayList = dayList(endInd-daysBack:endInd-1,:);
-end
+dayList = dayList(2:end,col);
+% endInd = find(cellfun(@isempty,dayList),1);
+% if ~isempty(endInd)
+dayList = dayList(end-daysBack:end,col);
+% end
+% dayList(end-daysBack:end-1,:);
 figure;
 set(gcf, 'Position', get(0,'Screensize'));
-suptitle(animal);
+title(animal);
 
-for i = 1: length(dayList)
-    sessionName = dayList{i};
+
+for d = 1: length(dayList)
+    sessionName = dayList{d};
+    sessionName = ['m' sessionName];
     [animalName, date] = strtok(sessionName, 'd'); 
-    animalName = animalName(2:end);
+    animalName = animal;
     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
@@ -31,11 +32,11 @@ for i = 1: length(dayList)
         behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
 
-    if coupledFlag  
+    if revForFlag  
             [behSessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatchingTraining(sessionName);
     else
         if exist(behSessionDataPath,'file')
-            load(behSessionDataPath)
+            load(behSessionDataPath);
         else
             [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(sessionName);
         end
@@ -63,7 +64,7 @@ for i = 1: length(dayList)
     allRewards(logical(allReward_L)) = -1;
 
     allITIs = [behSessionData(responseInds).trialEnd] - [behSessionData(responseInds).CSon];
-    if ~coupledFlag
+    if ~revForFlag
         allProbsL = [behSessionData(responseInds).rewardProbL];
         allProbsR = [behSessionData(responseInds).rewardProbR];
     end
@@ -106,8 +107,8 @@ for i = 1: length(dayList)
         end
     end
 
-    subplot(daysBack,3,3*i); hold on
-    suptitle(sessionName);
+    subplot(daysBack+1,5,5*d); hold on
+    title(sessionName);
     histogram(lickLat_L,0:50:1500,'Normalization','probability', 'FaceColor', 'm'); histogram(lickLat_R,0:50:1500,'Normalization','probability', 'FaceColor', 'c')
     legend('Left Licks','Right Licks')
     xlabel('Lick Latency (ms)')
@@ -157,7 +158,9 @@ for i = 1: length(dayList)
 
     % trial plot
     
-    subplot(daysBack,3,[((3*i)-2) ((3*i)-2)]); hold on
+    subplot(daysBack+1,5,[((5*d)-4) ((5*d)-1)]); hold on
+    normKern = normpdf(-15:15,0,4);
+    normKern = normKern / sum(normKern);
     smoothRew = conv(allRewards,normKern)/max(conv(allRewards,normKern));
     kernShift = (length(normKern) - 1)/2;
     smoothRew = smoothRew(kernShift:(length(smoothRew)-kernShift));
@@ -202,7 +205,7 @@ for i = 1: length(dayList)
         end
     end
 
-    if coupledFlag
+    if revForFlag
         for i = 1:length(blockSwitch)
             bs_loc = origBlockSwitch(i);
             plot([bs_loc bs_loc],[-1 1],'--','linewidth',1,'Color',[30 144 255]./255)
