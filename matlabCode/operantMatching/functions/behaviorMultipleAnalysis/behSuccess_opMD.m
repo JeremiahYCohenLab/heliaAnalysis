@@ -31,7 +31,7 @@ allRewardsComb = [];
 allRewardsBinComb = [];
 
 for i = 1: length(dayList)
-    sessionName = dayList{i};
+    sessionName = ['m' dayList{i}];
     [animalName, date] = strtok(sessionName, 'd'); 
     animalName = animalName(2:end);
     date = date(1:9);
@@ -49,12 +49,13 @@ for i = 1: length(dayList)
         if revForFlag
             behSessionData = sessionData;
         end
-    elseif revForFlag                                    %otherwise generate the struct
-        [behSessionData, ~] = generateSessionData_behav_operantMatching(sessionName);
     else
-        [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+        if revForFlag                                    %otherwise generate the struct
+            [behSessionData, ~] = generateSessionData_behav_operantMatching(sessionName);
+        else
+            [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+        end
     end
-    
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
     allReward_R = [behSessionData(responseInds).rewardR]; 
     allReward_L = [behSessionData(responseInds).rewardL]; 

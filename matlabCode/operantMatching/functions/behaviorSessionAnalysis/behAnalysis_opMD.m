@@ -23,14 +23,15 @@ end
 
 if coupledFlag
     if exist(behSessionDataPath,'file')
-        load(behSessionDataPath)
+        load(behSessionDataPath);
         behSessionData = sessionData;
     else
         [behSessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatching(sessionName);
     end
 else
     if exist(behSessionDataPath,'file')
-        load(behSessionDataPath)
+        load(behSessionDataPath);
+%         behSessionData = sessionData;
     else
         [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
@@ -77,7 +78,7 @@ end
 %% 
 figure
 set(gcf, 'Position', get(0,'Screensize'))
-suptitle(sessionName)
+%%suptitle(sessionName)
 
 %%
 subplot(6,8,[17:20 25:28]); hold on   %%probability of choice and reward plot
@@ -504,7 +505,7 @@ end
 %%
 figure   %make new lick behavior analysis figure
 set(gcf, 'Position', get(0,'Screensize'))
-suptitle(sessionName)
+% suptitle(sessionName)
 
 
 %% lick latency and recent rwd hist analysis

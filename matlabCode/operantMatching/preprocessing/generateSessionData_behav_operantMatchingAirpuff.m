@@ -86,17 +86,21 @@ for i = 1:length(sessionText)
             if ~isempty(strfind(sessionText{currTrialInd},'Airpuff On'))
                 if ~isempty(strfind(sessionText{currTrialInd},'Airpuff Off'))
                     temp6 = regexp(sessionText{currTrialInd}, ': ', 'split');
+%                     temp7 = regexp(temp6{1,2}, ' ,', 'split');
                     temp7 = regexp(temp6{1,2}, ' ,', 'split');
                     sessionData(currTrial).AirpuffTimeOn = str2double(temp7{1,1});
-                    temp8 = regexp(temp6{1,2}, ' :', 'split');
-                    temp9 = temp8(1,2);
+%                     temp8 = regexp(temp6{1,2}, ' :', 'split');
+%                     temp9 = temp8(1,2);
+                     temp9 = temp6{1,3};
                     sessionData(currTrial).AirpuffTimeOff =str2double(temp9);
-                elseif ~isempty(strfind(sessionText{currTrialInd+1},'Airpuff Off'))
+                else
+                    if isempty(strfind(sessionText{currTrialInd+1},'Airpuff Off'))
                         temp10 = regexp(sessionText{currTrialInd+1}, ' :', 'split');
                         sessionData(currTrial).lickAfterpuff = 1;
                         temp11 = str2double(temp10(1,2));
                         sessionData(currTrial).AirpuffTimeOff = temp11;
                         sessionData(currTrial).AirpuffTimeOn =temp11+51;
+                    end
                 end
             end
             if ~isempty(strfind(sessionText{currTrialInd}, 'Contingency'))
