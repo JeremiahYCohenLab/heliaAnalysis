@@ -1,0 +1,152 @@
+alpha = 1e-1; 
+% the probability of a random action (non-greedy): 
+epsilon = 0.1; 
+% the discount factor: 
+gamma = 0.95;
+gamma,kappa,nPlanningSteps,mz_fn,s_start,s_end,MAX_N_STEPS)
+
+
+PLOT_STEPS = 0; 
+
+function A = makeMazeChapt8(ts,section)
+
+if section ==1 %ts is the timestep telling us if the maze has changed.  
+    A = zeros(6,9); 
+    A(2:4,3) = 1; %maze one
+    A(1:3,8) = 1; 
+    A(5,6) = 1;
+elseif section ==2
+    if( ts<1000 )
+        A(4,1:8) = 1;  % the first maze
+    else
+        A(4,2:9) = 1;  % the second maze
+    end
+elseif section ==3
+    if( ts<3000 )
+        A(4,2:9) = 1; % the first maze
+    else
+        A(4,2:8) = 1; % the second maze
+    end
+end
+
+end
+
+%MZ = mz_fn(0); ? our initial maze
+[sideII,sideJJ] = size(MZ);
+
+% the maximal number of states: 
+nStates = sideII*sideJJ; 
+nActions = 4;
+
+% Q = zeros(nStates,nActions); ??
+q = -3*ones(nStates,nActions);
+
+%for planing we need to store the sequence of states experienced. (store
+%their indices) and store the sequence of actions in each state
+seen_states = [];
+act_taken   = zeros(nStates,nActions); %0 action not taken, 1 taken
+
+
+%model of the environment
+Model_ns = zeros(nStates,nActions); % <- next state we will obtain 
+Model_nr = zeros(nStates,nActions); % <- next reward we will ob
+
+if( PLOT_STEPS )
+  figure; imagesc( zeros(sideII,sideJJ) ); colorbar; hold on; 
+  plot( s_start(2), s_start(1), 'x', 'MarkerSize', 10, 'MarkerFaceColor', 'k' ); 
+  plot( s_end(2), s_end(1), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'k' ); 
+end
+
+
+% keep track of how many timestep we take per episode:
+ets = []; ts=0; 
+
+% for exploration: we need to keep track of the number of timesteps elapsed
+% between ??
+% each "real" evaluation of this state and action pair:
+%nts_since_visit = +Inf*ones(nStates,nActions); 
+%nts_since_visit = +10*ones(nStates,nActions);     % <- a very optimistic reward ... to encourage exploration ... 
+nts_since_visit = zeros(nStates,nActions);     % <- don't visit a state until we have visited it at least ONCE ... 
+
+%initialize the starting state
+st = s_start; sti = sub2ind( [sideII,sideJJ], st(1), st(2) ); 
+
+for tsi==1:MAX_N_STEPS  %?
+  tic; 
+%   if( tsi==1 ) 
+%     fprintf('working on step %d...\n',tsi);
+%   else
+%     fprintf('working on step %d (ptt=%10.6f secs)...\n',tsi, toc); tic; 
+%   end
+  if( 0 && mod(tsi,100)==0 ) 
+    fprintf('working on step %d (ptt=%10.6f secs)...\n',tsi, toc); tic; 
+  end
+  %--
+  % Action section:
+  %--
+  % use an epsilon greedy policy derived FROM Q but modified by how long it has been since we have visited 
+  % this state/action pair in a REAL interaction with the environment ... (this is similar to dynaQplus)
+  actSelQ = Q + kappa*sqrt( nts_since_visit );
+  [dum,at] = max(actSelQ(sti,:));  % at \in [1,2,3,4]=[up,down,right,left]
+  if( rand<epsilon )               % we explore ... with a random action 
+    tmp=randperm(nActions); at=tmp(1); 
+  end
+
+  % for planning: keep track of the states/action seen 
+  if( ~ismember(sti,seen_states) ) seen_states = [ sti; seen_states ]; end
+  act_taken( sti, at ) = 1; 
+  
+  % keep track of the number of timesteps since we visited this state: 
+  %
+  nts_since_visit = nts_since_visit + 1; % increment all non visited state/action pair: 
+  nts_since_visit(sti,at) = 0;           % reinitialize the one that we DID visit 
+
+  
+% ; my old code stuff
+% start = grid(1,4);
+% goal = grid(6, 9);
+% barrier = grid(3, 1:8);
+% new_barrier = grid(3,2:9);
+
+
+numFinishes = 0;
+
+numStates = 1000;
+compTime = 3000;
+b = 2;
+n = 10;
+VgreedyS0 = 
+pTerm = 0.1;
+tTeminal = false;
+tMatx(numStates,3) = [];
+actions = ['N', 'E', 'S', 'W'];
+act_len = length(actions);
+
+
+
+for i = 1: compTime
+    if randn >= epsilon
+        for s = 1:numStates
+            a(s) = find(max(q(s,:)));
+        end
+
+            else a(s) = find(max(q(s)),2);
+                if a(s) ,:))== 2
+                    s(s+1,2) =  randi(b);
+                    s(s+1,1) = 0;
+                elseif a(s) == 1
+                    s(s+1,1) =  randi(b);
+                    s(s+1,2) = 0;
+                end
+                tMatx(s,1) = s(s(s+1) ~= 0);
+                tMatx(s,2) = a(s);
+                mu = 0;
+                sigm = 1;
+                tMatx(s,3) = randn;
+                q(s,a(s)) = tMatx(s,3) + q(s+1,a(s));
+    rew = randn;
+    state(i) = 
+    else
+        tTerminal = true;
+        
+        

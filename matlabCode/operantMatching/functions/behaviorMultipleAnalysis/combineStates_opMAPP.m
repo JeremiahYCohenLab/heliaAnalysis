@@ -1,5 +1,5 @@
  
-function [glm_rwdNoRwd_safe, glm_rwdNoRwd_threat, tMax] = combineLogRegStates_opMAPP(xlFile, animal, category, revForFlag)
+function [glm_rwdNoRwd_safe, glm_rwdNoRwd_threat, tMax] = combineStates_opMAPP(xlFile, animal, category, revForFlag)
 
 if nargin < 4
     %plotFlag = 0;
@@ -37,13 +37,13 @@ end
 for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
-    animalName = animalName(2:end);
+    %animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
-        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_sessionData_behav.mat'];
+        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sep sessionFolder(end) sep sep sessionFolder '_sessionData_behav.mat'];
     else
-        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
+        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionFolder '_sessionData_behav.mat'];
     end
 %     if exist(sessionDataPath,'file')
 %         load(sessionDataPath)
@@ -52,7 +52,7 @@ for i = 1: length(dayList)
 %             [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
 %         end
 %     elseif revForFlag                                    %otherwise generate the struct
-        [behSessionData,blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
+        [behSessionData,blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionFolder);
 % 
 %     else
 %         [sessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);

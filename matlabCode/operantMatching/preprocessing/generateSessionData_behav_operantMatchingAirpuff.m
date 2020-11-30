@@ -29,7 +29,7 @@ sessionData.lickAfterpuff = [];
 sessionData.autopause = [];
 sessionData.ManulWaterR = [];
 sessionData.ManulWaterL = [];
-
+sessionData.delayNlw = [];
 
 blockSwitch = 1;
 blockProbs = {};
@@ -76,6 +76,7 @@ for i = 1:length(sessionText)
             sessionData(1).stateType = 0; %starts with state 0/safe
         end  
         waterDeliverFlag = false;
+        DoneManual = false;
         allL_licks = [];
         allR_licks = [];
         for currTrialInd = tBegin:tEnd
@@ -153,6 +154,18 @@ for i = 1:length(sessionText)
                     waterDeliverFlag = true;
                 end
             end
+            if (~DoneManual)
+                if strfind(sessionText{currTrialInd},'L port - Manual Water Delivered') 
+                       temp = regexp(sessionText(currTrialInd), ': ', 'split');
+                       sessionData(currTrial).ManulWaterL = str2double(temp{1}{2});
+                       DoneManual = true;
+                end
+                if strfind(sessionText{currTrialInd},'R port - Manual Water Delivered')
+                        temp = regexp(sessionText(currTrialInd), ': ', 'split');
+                        sessionData(currTrial).ManulWaterR = str2double(temp{1}{2});
+                        DoneManual = true;
+                end
+            end
             if currTrialInd == tEnd % run this at the last index || currTrialInd == length(sessionText)-1
                 sessionData(currTrial).licksL = allL_licks;
                 sessionData(currTrial).licksR = allR_licks;
@@ -163,6 +176,10 @@ for i = 1:length(sessionText)
                     sessionData(currTrial).rewardL = NaN;
                     sessionData(currTrial).rewardR = NaN;
                     sessionData(currTrial).rewardTime = NaN;
+                end
+                if ~DoneManual 
+                    sessionData(currTrial).ManulWaterL = NaN;
+                    sessionData(currTrial).ManulWaterR = NaN;
                 end
                 if tEnd ~= length(sessionText)
                     temp = regexp(sessionText(tEnd+1), ': ', 'split');
@@ -177,10 +194,14 @@ for i = 1:length(sessionText)
                     blockProbs = [blockProbs {sessionText{currTrialInd}(end-4:end)}];
                 end
             end 
+            if ~isempty(strfind(sessionText{currTrialInd},'Delayed'))
+                 temp = regexp(sessionText(currTrialInd), ': ', 'split');
+                 sessionData(currTrial).delayNlw = str2double(temp{1}{2});
+            end
          end
      end
 end
-savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sorted' sep 'session' sep];
+savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sortedap' sep 'session' sep];
 if isempty(dir(savepath))
     mkdir(savepath)
 end
