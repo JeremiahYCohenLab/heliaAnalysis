@@ -65,7 +65,7 @@ for i = 1: length(dayList)
     stateChangeInds = [1 (find(abs(diff([behSessionData(responseInds).stateType])) == 1) + 1)  length(responseInds)];
 
     allAirpuff = [behSessionData(responseInds).AirpuffTimeOn];
-    allAirpuff(~allAirpuff == 0) = 1;
+    allAirpuff(allAirpuff ~= 0) = 1;
     allReward_R = [behSessionData(responseInds).rewardR];
     allReward_L = [behSessionData(responseInds).rewardL]; 
     allChoices = NaN(1,length(behSessionData(responseInds)));
