@@ -22,11 +22,13 @@ sessionData.rewardR = [];
 sessionData.rewardTime = [];
 sessionData.rewardProbL = [];
 sessionData.rewardProbR = [];
-sessionData.AirpuffTimeOn = [];
-sessionData.AirpuffTimeOff = [];
+% sessionData.AirpuffTimeOn = [];
+% sessionData.AirpuffTimeOff = [];
 sessionData.lickAfterpuff = [];
 sessionData.autopause = [];
 sessionData.delayNlw = [];
+sessionData.ManulWaterL = [];
+sessionData.ManulWaterR = [];
 
 
 blockSwitch = 1;
@@ -82,22 +84,22 @@ for i = 1:length(sessionText)
               temp12 = regexp(sessionText{currTrialInd}, ': ', 'split');
               sessionData(currTrial).autopause = str2double(temp12(1,2));
             end
-            if ~isempty(strfind(sessionText{currTrialInd},'Airpuff On'))
-                if ~isempty(strfind(sessionText{currTrialInd},'Airpuff Off'))
-                    temp6 = regexp(sessionText{currTrialInd}, ': ', 'split');
-                    temp7 = regexp(temp6{1,2}, ' ,', 'split');
-                    sessionData(currTrial).AirpuffTimeOn = str2double(temp7{1,1});
-                    temp8 = regexp(temp6{1,2}, ' :', 'split');
-                    temp9 = temp8(1,2);
-                    sessionData(currTrial).AirpuffTimeOff =str2double(temp9);
-                elseif ~isempty(strfind(sessionText{currTrialInd+1},'Airpuff Off'))
-                        temp10 = regexp(sessionText{currTrialInd+1}, ' :', 'split');
-                        sessionData(currTrial).lickAfterpuff = 1;
-                        temp11 = str2double(temp10(1,2));
-                        sessionData(currTrial).AirpuffTimeOff = temp11;
-                        sessionData(currTrial).AirpuffTimeOn =temp11+51;
-                end
-            end
+%             if ~isempty(strfind(sessionText{currTrialInd},'Airpuff On'))
+%                 if ~isempty(strfind(sessionText{currTrialInd},'Airpuff Off'))
+%                     temp6 = regexp(sessionText{currTrialInd}, ': ', 'split');
+%                     temp7 = regexp(temp6{1,2}, ' ,', 'split');
+%                     sessionData(currTrial).AirpuffTimeOn = str2double(temp7{1,1});
+%                     temp8 = regexp(temp6{1,2}, ' :', 'split');
+%                     temp9 = temp8(1,2);
+%                     sessionData(currTrial).AirpuffTimeOff =str2double(temp9);
+%                 elseif ~isempty(strfind(sessionText{currTrialInd+1},'Airpuff Off'))
+%                         temp10 = regexp(sessionText{currTrialInd+1}, ' :', 'split');
+%                         sessionData(currTrial).lickAfterpuff = 1;
+%                         temp11 = str2double(temp10(1,2));
+%                         sessionData(currTrial).AirpuffTimeOff = temp11;
+%                         sessionData(currTrial).AirpuffTimeOn =temp11+51;
+%                 end
+%             end
             if ~isempty(strfind(sessionText{currTrialInd}, 'Contingency'))
                 temp = regexp(sessionText{currTrialInd}, '). ', 'split');
                 temp2 = regexp(temp(1,2), '/', 'split');
@@ -163,9 +165,9 @@ for i = 1:length(sessionText)
             if currTrialInd == tEnd % run this at the last index || currTrialInd == length(sessionText)-1
                 sessionData(currTrial).licksL = allL_licks;
                 sessionData(currTrial).licksR = allR_licks;
-                if isempty(sessionData(currTrial).AirpuffTimeOn)
-                    sessionData(currTrial).AirpuffTimeOn = 0;
-                end
+%                 if isempty(sessionData(currTrial).AirpuffTimeOn)
+%                     sessionData(currTrial).AirpuffTimeOn = 0;
+%                 end
                 if ~waterDeliverFlag
                     sessionData(currTrial).rewardL = NaN;
                     sessionData(currTrial).rewardR = NaN;
@@ -188,13 +190,23 @@ for i = 1:length(sessionText)
                     blockProbs = [blockProbs {sessionText{currTrialInd}(end-4:end)}];
                 end
             end
-             if ~isempty(strfind(sessionText{currTrialInd},'Delayed'))
+            if ~isempty(strfind(sessionText{currTrialInd},'Delayed'))
                  temp = regexp(sessionText(currTrialInd), ': ', 'split');
                  sessionData(currTrial).delayNlw = str2double(temp{1}{2});
-             end
+            end
         end
-     end
-   end
+    end
+ end
+savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sortedTraining' sep 'session' sep];
+if isempty(dir(savepath))
+    mkdir(savepath)
+end
+
+f_IndA = find(behavioralDataPath==sep,1,'last');
+f_IndB = strfind(behavioralDataPath,'.asc');
+filename = behavioralDataPath(f_IndA+1:f_IndB-1);
+
+save([savepath filename '_sessionData_behav.mat'], 'sessionData', 'blockSwitch', 'blockProbs');
 end
 function dataOutput = importData_operantMatching(filename, startRow, endRow)
 %IMPORTFILE Import numeric data from a text file as a matrix.

@@ -1,73 +1,76 @@
+% DYNAQPLUS_MAZE_SCRIPT - Implements the DynaQ Algorithm on the simple maze example found in Chapter 9
+% 
+% Written by:
+% -- 
+% John L. Weatherwax                2007-12-03
+% 
+% email: wax@alum.mit.edu
+% 
+% Please send comments and especially bug reports to the
+% above email address.
+% 
+%-----
 
-firstSARewSumOpt = zeros(nstates,nActs);
-firstSARewCntOpt = zeros(nstates,nActs);
-a = 3;
+close all; 
+clc; 
 
-for l = 1: 10000
-    currStatesOpt = [];
-    currVelOpt = [];
-    currVelOpt(1,1:2) = [0,0];
-    currStatesOpt = startingCor;
-    R1 = 0;
-    while sum(sum(currStatesOpt(end,:) == endingcor(:,1:2))) < 2
-            indxr = sub2ind([5,5], currStatesOpt(end,1),currStatesOpt(end,2));
-            indxact = find(actions(:,1) == pi_opt(indxr,1,l));
-            indxact2 = find((actions(:,2) == pi_opt(indxr,2,l)));
-            indxact1 = ismember(indxact2,indxact);
-            currVelOpt(end+1,:) = currVelOpt(end,:) + pi_opt(indxr,l);
-%             currVelOpt(end+1,:) = currVelOpt(end,:) + actions(indxact1,:);
-            if ~(currVelOpt(end,1) <= 5 && currVelOpt(end,2) <= 5 && currVelOpt(end,1) > 0 && currVelOpt(end,2) > 0)
-                currVelOpt(end,:) = [1,1];
-                currStatesOpt(end+1,:) = currStatesOpt(end,:) +  currVelOpt(end,:);
-                if length(currStatesOpt) < 60 
-                    if currStatesOpt(end,1) <= min(boundry(:,1)) || currStatesOpt(end,2) <= min(boundry(:,2)) || currStatesOpt(end,1) > max(boundry(:,1)) || currStatesOpt(end,2) > max(boundry(:,2))
-                        currStatesOpt(end,:) = startingCor;
-                        currVelOpt(end,:) = [0,0];
-                        R1 = R1-1;
-                    else
-                        R1 = R1 -1;
-                        indxr = sub2ind([5,5], currStatesOpt(end,1),currStatesOpt(end,2)); %new state
-                        firstSARewCntOpt(indxr,indxact1) = firstSARewCntOpt(indxr,indxact1)+1; 
-                        firstSARewSumOpt(indxr,indxact1) = firstSARewSumOpt(indxr,indxact1)+R;
-                        Q_opt(indx,indxact1)             = firstSARewSumOpt(indxr,indxact1)/firstSARewCntOpt(indxr,indxact1); % <-take the average
-    %                  States(end,2,i)+currVel(end,:,i))); %new state   
-                       a = a ;
-                       hold on; plot(currStatesOpt(end,:)+ pi_opt(indx,:,l),'rs', 'Markersize', a +1);
-                    end
-                else
-                    disp('greater than 60');
-                    currStatesOpt = [];
-                    currVelOpt = [];
-                    currVelOpt(1,1:2) = [0,0];
-                    currStatesOpt(1,1:2) = startingCor ;
-                    R1 = 0;
-                end
-         else
-            currStatesOpt(end+1,:) = currStatesOpt(end,:) +  currVelOpt(end,:);
-             if length(currStatesOpt) < 60 
-                if currStatesOpt(end,1) <= min(boundry(:,1)) || currStatesOpt(end,2) <= min(boundry(:,2)) || currStatesOpt(end,1) > max(boundry(:,1)) || currStatesOpt(end,2) > max(boundry(:,2))
-                    currStatesOpt(end,:) = startingCor;
-                    currVelOpt(end,:) = [0,0];
-                    R1 = R1-1;
-                else
-                    R1 = R1 -1;
-                    indxr = sub2ind([5,5], currStatesOpt(end,1),currStatesOpt(end,2)); %new state
-    %                 WC = 1/firstSARewCnt(indxpi,pi(indxpi,i));
-                    firstSARewCntOpt(indxr,indxact1) = firstSARewCntOpt(indxr,indxact1)+1; 
-                    firstSARewSumOpt(indxr,indxact1) = firstSARewSumOpt(indxr,indxact1)+R;
-                    Q_opt(indxr,indxact1)             = firstSARewSumOpt(indxr,indxact1)/firstSARewCntOpt(indxr,indxact1); % <-take the average         
-                    hold on; plot(currStatesOpt(end,1) + pi_opt(indxr,1),currStatesOpt(end,2 )+ pi_opt(indxr,2),'rs',  'Markersize', a +1);
-    %                 
-                 end
-             else
-               disp('greater than 60');
-               currStatesOpt = [];
-               currVelOpt = [];
-               currVelOpt(1,1:2) = [0,0];
-               currStatesOpt(1,1:2) = startingCor;
-               R1 = 0;
-            end    
-%          
-        end
-     end
+% sample_discrete.m
+addpath( genpath( '../../../FullBNT-1.0.4/KPMstats/' ) ); 
+
+% the learning rate: 
+alpha = 1e-1; 
+
+% the probability of a random action (non-greedy): 
+epsilon = 0.1; 
+
+% the discount factor: 
+gamma = 0.95;
+%gamma = 1.0; 
+
+% get our initial maze (the blocking maze): 
+MZ = mk_ex_9_2_mz(0); [sideII,sideJJ] = size(MZ); 
+
+% the beginning and terminal states (in matrix notation): 
+s_start = [ 6, 4 ]; 
+s_end   = [ 1, 9 ]; 
+
+MAX_N_STEPS=30; 
+%MAX_N_STEPS=1e3;
+% MAX_N_STEPS=1e4;
+% MAX_N_STEPS=1e5;
+%MAX_N_STEPS=1e6;
+%MAX_N_STEPS=10e6;
+
+% the number of steps to do in planning: 
+%nPlanningSteps = 0; 
+nPlanningSteps = 5; 
+%nPlanningSteps = 50; 
+nPSV = [ 0, 5, 50 ]; 
+
+% a factor relating how important revisiting old states is, relative to 
+% the past recieved reward coming from these states/action pairs ... 
+%kappa = 0.02; 
+kappa = 2/sqrt(MAX_N_STEPS); 
+
+allCR = zeros(2*length(nPSV),MAX_N_STEPS); 
+for npsi=1:length(nPSV),
+  nPlanningSteps = nPSV(npsi);
+  
+  [Q,ets,cr] = ex_9_4_dynaQplus(alpha,epsilon,gamma,kappa,nPlanningSteps,@mk_ex_9_2_mz,s_start,s_end,MAX_N_STEPS);
+  allCR(npsi,:) = cr(2:end); 
+  fhl{npsi} = sprintf('dynaQplus: %d planning steps',nPlanningSteps); 
+  
+  [Q,ets,dum1,dum2,dum3,cr] = dynaQ_maze(alpha,epsilon,gamma,nPlanningSteps,@mk_ex_9_2_mz,s_start,s_end,MAX_N_STEPS);
+  allCR(length(nPSV)+npsi,:) = cr(2:end); 
+  fhl{length(nPSV)+npsi} = sprintf('dynaQ: %d planning steps',nPlanningSteps); 
 end
+
+figure; fhs=plot( (1:3000), allCR(:,2:3001), '-' ); 
+title( 'cummulative reward' ); grid on;
+xlabel('timestep index'); ylabel('cum. reward'); drawnow; 
+legend( fhs, fhl, 'Location', 'NorthWest' );
+fn = sprintf('blocking_dynaQplus_vs_dyanQ_cum_reward'); saveas( gcf, fn, 'png' ); 
+
+clear functions;
+%close all; 
+return; 

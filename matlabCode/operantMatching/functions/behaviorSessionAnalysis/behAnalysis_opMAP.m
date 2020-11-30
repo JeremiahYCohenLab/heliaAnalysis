@@ -331,11 +331,16 @@ for i = 1:length(behSessionData)
 %         j = j + 1;
 %     end
 end
-for i = 1:length(behSessionData)
-    if (~behSessionData(i).AirpuffTimeOn == 0)
-        plot(i, 0.3, 'h', 'MarkerFaceColor', [255,69,0]./255, 'MarkerSize', 10, 'MarkerEdgeColor', [1 1 0]); hold on;
+    for i = 1:length(behSessionData)
+        if (~behSessionData(i).AirpuffTimeOn == 0)
+            plot(i, 0.3, 'h', 'MarkerFaceColor', [255,69,0]./255, 'MarkerSize', 10, 'MarkerEdgeColor', [1 1 0]); hold on;
+        end
     end
-end
+    if (~isnan(behSessionData(i).ManulWaterL))
+        plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
+    elseif (~isnan(behSessionData(i).ManulWaterL)) 
+        plot([i i],[0 nrMag],'g', 'linewidth',4)
+    end
 if coupledFlag
     for i = 1:length(blockSwitch)
         bs_loc = origBlockSwitch(i);

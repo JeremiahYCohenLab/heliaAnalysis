@@ -1,6 +1,6 @@
-function multipleDaysTraining(xlFile, animal, category, daysBack, revForFlag)
+function multipleDaysTraining(xlFile, animal, category, session, daysBack, revForFlag)
 
-if nargin < 5
+if nargin < 6
     revForFlag = 0;
 end
  
@@ -8,36 +8,47 @@ end
 
 [weights, dayList, ~] = xlsread(xlFile, animal);
 [~,col] = find(~cellfun(@isempty,strfind(dayList, category)) == 1);
-% session = end
-% start = end-daysBack  figure category first
-% dayList = dayList(2:end,col);
+dayList = dayList(2:end,col);
 endInd = find(cellfun(@isempty,dayList),1);
 if ~isempty(endInd)
+% % find(~cellfun(@isempty,strfind(dayList(:,col), session)) == 1)
     dayList = dayList(endInd-daysBack:endInd-1,:);
+%     dayList = dayList(1:endInd-1,:);
+else
+    dayList = dayList(end-daysBack:end,:);
 end
 figure;
 set(gcf, 'Position', get(0,'Screensize'));
-suptitle(animal);
+t = title(category);
+% ax = gca;
+% ax.TitleHorizontalAlignment = 'center';
 
-for i = 1: length(dayList)
-    sessionName = dayList{i};
+for d = 1: length(dayList)
+    sessionName = dayList{d};
+    sessionName = ['m' sessionName];
     [animalName, date] = strtok(sessionName, 'd'); 
-    animalName = animalName(2:end);
+    animalName = animal;
     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
-        behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];
+        behSessionDataPath = [root animalName sep sessionFolder sep 'sortedTraining' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behavTraining.mat'];
     else
-        behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
+        behSessionDataPath = [root animalName sep sessionFolder sep 'sortedTraining' sep 'session' sep sessionName '_sessionDataTraining_behav.mat'];
     end
 
-    if coupledFlag  
+    if revForFlag  
+        if exist(behSessionDataPath,'file')
+            load(behSessionDataPath);
+            behSessionData = sessionData;
+        else
             [behSessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatchingTraining(sessionName);
+        end
     else
         if exist(behSessionDataPath,'file')
-            load(behSessionDataPath)
+            load(behSessionDataPath);
+            behSessionData = sessionData;
         else
-            [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(sessionName);
+            [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupledTraining(sessionName);
         end
     end
     
@@ -63,7 +74,7 @@ for i = 1: length(dayList)
     allRewards(logical(allReward_L)) = -1;
 
     allITIs = [behSessionData(responseInds).trialEnd] - [behSessionData(responseInds).CSon];
-    if ~coupledFlag
+    if ~revForFlag
         allProbsL = [behSessionData(responseInds).rewardProbL];
         allProbsR = [behSessionData(responseInds).rewardProbR];
     end
@@ -72,84 +83,109 @@ for i = 1: length(dayList)
         blockSwitch = blockSwitch(1:end-1);
     end
     %% determine and plot lick latency distributions for each spout
-    lickLat = [];       lickRate = [];
-    lickLat_L = [];     lickRate_L = [];
-    lickLat_R = [];     lickRate_R = [];
-    for i = 1:length(behSessionData)
-        if ~isempty(behSessionData(i).rewardTime)
-            lickLat = [lickLat behSessionData(i).rewardTime - behSessionData(i).CSon];
-            if ~isnan(behSessionData(i).rewardL)
-                lickLat_L = [lickLat_L behSessionData(i).rewardTime - behSessionData(i).CSon];
-                if behSessionData(i).rewardL == 1
-                    if length(behSessionData(i).licksL) > 1
-                        lickRateTemp = 1000/(min(diff(behSessionData(i).licksL)));  %%each trial has a lick latency
-                        lickRate = [lickRate lickRateTemp];
-                        lickRate_L = [lickRate_L lickRateTemp];
-                    else
-                       lickRate = [lickRate 0];
-                       lickRate_L = [lickRate_L 0]; 
-                    end
+lickLat = [];       lickRate = [];
+lickLat_L = [];     lickRate_L = [];
+lickLat_R = [];     lickRate_R = [];
+for i = 1:length(behSessionData)
+    if ~isempty(behSessionData(i).rewardTime)
+        lickLat = [lickLat behSessionData(i).rewardTime - behSessionData(i).CSon];
+        if ~isnan(behSessionData(i).rewardL)
+            lickLat_L = [lickLat_L behSessionData(i).rewardTime - behSessionData(i).CSon];
+            if behSessionData(i).rewardL == 1
+                if length(behSessionData(i).licksL) > 1
+                    lickRateTemp = 1000/(min(diff(behSessionData(i).licksL)));  %%each trial has a lick latency
+                    lickRate = [lickRate lickRateTemp];
+                    lickRate_L = [lickRate_L lickRateTemp];
+                else
+                   lickRate = [lickRate 0];
+                   lickRate_L = [lickRate_L 0]; 
                 end
-            elseif ~isnan(behSessionData(i).rewardR)
-                lickLat_R = [lickLat_R behSessionData(i).rewardTime - behSessionData(i).CSon];      %make single licks zeros for easier indexing
-                if behSessionData(i).rewardR == 1
-                    if length(behSessionData(i).licksR) > 1
-                        lickRateTemp = 1000/(min(diff(behSessionData(i).licksR)));
-                        lickRate = [lickRate lickRateTemp];
-                        lickRate_R = [lickRate_R lickRateTemp];
-                    else
-                        lickRate = [lickRate 0];
-                        lickRate_R = [lickRate_R 0];
-                    end
+            end
+        elseif ~isnan(behSessionData(i).rewardR)
+            lickLat_R = [lickLat_R behSessionData(i).rewardTime - behSessionData(i).CSon];      %make single licks zeros for easier indexing
+            if behSessionData(i).rewardR == 1
+                if length(behSessionData(i).licksR) > 1
+                    lickRateTemp = 1000/(min(diff(behSessionData(i).licksR)));
+                    lickRate = [lickRate lickRateTemp];
+                    lickRate_R = [lickRate_R lickRateTemp];
+                else
+                    lickRate = [lickRate 0];
+                    lickRate_R = [lickRate_R 0];
                 end
             end
         end
     end
-
-    subplot(daysBack,3,3*i); hold on
-    suptitle(sessionName);
+end
+    subplot(daysBack+1,5,5*d); hold on
+    title([sessionName category]);
     histogram(lickLat_L,0:50:1500,'Normalization','probability', 'FaceColor', 'm'); histogram(lickLat_R,0:50:1500,'Normalization','probability', 'FaceColor', 'c')
     legend('Left Licks','Right Licks')
     xlabel('Lick Latency (ms)')
     %% Z-scored lick latency analysis
+responseInd = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window%%response or correct response?
+omitInds = isnan([behSessionData.rewardTime]); 
 
-    lickLatResp = lickLat(responseInds);                    %remove NaNs from lickLat array
-    lickLatResp = lickLatResp(2:end);                       %shift for comparison to rwd history
-    lickLatInds = find(lickLatResp > 250);                  %find indices of non-preemptive licks (limit to normal distribution)
+blockSwitch2 = blockSwitch;
+origBlockSwitch = blockSwitch;
+tempBlockSwitch = blockSwitch;
+for i = 2:length(blockSwitch)
+    subVal = sum(omitInds(tempBlockSwitch(i-1):tempBlockSwitch(i)));
+    blockSwitch2(i:end) = blockSwitch(i:end) - subVal;
+end
 
-    if ~isnan(behSessionData(responseInds(1)).rewardR)      %remove first response for shift to compare to rwd hist
-        responseLat_R = lickLat_R(2:end);
-        responseLat_L = lickLat_L;
+allReward_R2 = [behSessionData(responseInd).rewardR]; 
+allReward_L2 = [behSessionData(responseInd).rewardL];  
+allChoices2 = NaN(1,length(behSessionData(responseInd))); 
+allChoices2(~isnan(allReward_R2)) = 1;  %%gives values 1 or -1 to choice R or L respectively
+allChoices2(~isnan(allReward_L2)) = -1;
+
+allReward_R2(isnan(allReward_R2)) = 0;
+allReward_L2(isnan(allReward_L2)) = 0;
+allChoice_R2 = double(allChoices2 == 1);
+allChoice_L2 = double(allChoices2 == -1);
+
+allRewards2 = zeros(1,length(allChoices2));
+allRewards2(logical(allReward_R2)) = 1; %%gives alues to reward R and L values 1 and -1 respectively
+allRewards2(logical(allReward_L2)) = -1;
+
+lickLatResp = lickLat(responseInd);                    %remove NaNs from lickLat array
+lickLatResp = lickLatResp(2:end);                       %shift for comparison to rwd history
+lickLatInds = find(lickLatResp > 250);                  %find indices of non-preemptive licks (limit to normal distribution)
+
+if ~isnan(behSessionData(responseInd(1)).rewardR)      %remove first response for shift to compare to rwd hist
+    responseLat_R = lickLat_R(2:end);
+    responseLat_L = lickLat_L;
+else
+    responseLat_R = lickLat_R;
+    responseLat_L = lickLat_L(2:end);
+end
+
+responseLat_R = responseLat_R(responseLat_R > 250);        %remove lick latencies outside of normal distribution
+responseLat_L = responseLat_L(responseLat_L > 250);
+responseLat_R  = zscore(responseLat_R);                   %get z scores for lick latencies based on spout side average
+responseLat_L  = zscore(responseLat_L);
+choicesLick = allChoices2(2:end);                        %make shifted choice array without preemptive licks
+choicesLick = choicesLick(lickLatInds);
+
+L = 1;
+R = 1;
+for j = 1:length(choicesLick)                     %put z scored lick latencies back in trial order
+    if choicesLick(j) == 1
+        responseLat(j) = responseLat_R(R);
+        R = R + 1;
     else
-        responseLat_R = lickLat_R;
-        responseLat_L = lickLat_L(2:end);
+        responseLat(j) = responseLat_L(L);
+        L = L + 1;
     end
+end
 
-    responseLat_R = responseLat_R(responseLat_R > 250);        %remove lick latencies outside of normal distribution
-    responseLat_L = responseLat_L(responseLat_L > 250);
-    responseLat_R  = zscore(responseLat_R);                   %get z scores for lick latencies based on spout side average
-    responseLat_L  = zscore(responseLat_L);
-    choicesLick = allChoices(2:end);                        %make shifted choice array without preemptive licks
-    choicesLick = choicesLick(lickLatInds);
+respRange = minmax(responseLat);
+if -respRange(1,1) > respRange(1,2)
+    normRespLat = responseLat / -respRange(1,1);
+else
+    normRespLat = responseLat / respRange(1,2);
+end
 
-    L = 1;
-    R = 1;
-    for j = 1:length(choicesLick)                     %put z scored lick latencies back in trial order
-        if choicesLick(j) == 1
-            responseLat(j) = responseLat_R(R);
-            R = R + 1;
-        else
-            responseLat(j) = responseLat_L(L);
-            L = L + 1;
-        end
-    end
-
-    respRange = minmax(responseLat);
-    if -respRange(1,1) > respRange(1,2)
-        normRespLat = responseLat / -respRange(1,1);
-    else
-        normRespLat = responseLat / respRange(1,2);
-    end
     %% Plot Raw Data
 
     rMag = 1;
@@ -157,7 +193,9 @@ for i = 1: length(dayList)
 
     % trial plot
     
-    subplot(daysBack,3,[((3*i)-2) ((3*i)-2)]); hold on
+    subplot(daysBack+1,5,[((5*d)-4) ((5*d)-1)]); hold on
+    normKern = normpdf(-15:15,0,4);
+    normKern = normKern / sum(normKern);
     smoothRew = conv(allRewards,normKern)/max(conv(allRewards,normKern));
     kernShift = (length(normKern) - 1)/2;
     smoothRew = smoothRew(kernShift:(length(smoothRew)-kernShift));
@@ -178,9 +216,14 @@ for i = 1: length(dayList)
                 else
                     plot([i i],[-1*nrMag 0],'k')
                 end
+            else
+                plot([i i],[-rMag 0],'r');  
+            end
+             % CSplus trial but no rewardL or rewardR
+            if (~isempty(behSessionData(i).delayNlw))
+                plot([i i],[rMag 0],'--r','linewidth',1)
+  %%when animal does not lick or licks in delay so many times thaty it moves to next trial
 
-            else % CSplus trial but no rewardL or rewardR
-                plot([i i],[-rMag rMag],'r')  %%when animal does not lick or licks in delay so many times thaty it moves to next trial
             end
         else % CS minus trial
             plot([i],0,'ko','markersize',4,'linewidth',2)
@@ -195,14 +238,14 @@ for i = 1: length(dayList)
         if (~isnan(behSessionData(i).ManulWaterL))
             plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
         elseif (~isnan(behSessionData(i).ManulWaterL)) 
-            plot([i i],[0 rMag],'g', 'linewidth',4)
+            plot([i i],[0 nrMag],'g', 'linewidth',4)
         end
-        if (~isempty(behSessionData(i).delayNlw))
-            plot([i i],[rMag 0],'--r', 'linewidth',1)
-        end
+%         if (~isempty(behSessionData(i).delayNlw))
+%             plot([i i],[rMag 0],'--r', 'linewidth',1)
+%         end
     end
 
-    if coupledFlag
+    if revForFlag
         for i = 1:length(blockSwitch)
             bs_loc = origBlockSwitch(i);
             plot([bs_loc bs_loc],[-1 1],'--','linewidth',1,'Color',[30 144 255]./255)
@@ -228,7 +271,6 @@ for i = 1: length(dayList)
     end
     text(0,1.5,'L/R');
     ylabel('<-- L       R  -->')
-
 %     % time plot
 %     subplot(6,8,[9:16]); hold on
 %     xlabel('Time (min)')
@@ -270,3 +312,8 @@ for i = 1: length(dayList)
 %     end
 %     xlim([0 currTime]); 
 end
+    savePath = [root animal sep 'training'];
+    if isempty(dir(savePath))
+        mkdir(savePath)
+    end
+    saveFigurePDF(gcf,[savePath sep session category '_sum']);
