@@ -40,7 +40,7 @@ else
     xlabel('Reward n seconds back')
 end
 title('LRM - Rewards on Licks')
-suptitle(animal)
+title(animal)
 legend('safe', 'threat')
 ylabel('\beta Coefficient')
 
@@ -73,4 +73,4 @@ legend('stay', 'switch')
 title('threat lick latency')
 
 
-suptitle(animal)
+title(animal)

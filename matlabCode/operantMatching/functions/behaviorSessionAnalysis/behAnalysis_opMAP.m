@@ -417,6 +417,14 @@ for i = 1:length(behSessionData)
         else % CSplus trial but no rewardL or rewardR
             plot([currTime currTime],[-rMag rMag],'r')
         end
+        if (~isnan(behSessionData(i).ManulWaterL))
+            plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
+        elseif (~isnan(behSessionData(i).ManulWaterL)) 
+            plot([i i],[0 rMag],'g', 'linewidth',4)
+        end
+        if (~isempty(behSessionData(i).delayNlw))
+            plot([i i],[rMag 0],'--r', 'linewidth',1)
+        end
         for q = 1:length(origstateSwitch)
             if any(i == origstateSwitch(q))
                 if q ~= length(origstateSwitch)

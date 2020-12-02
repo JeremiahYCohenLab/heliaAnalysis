@@ -16,9 +16,9 @@ date = date(1:9);
 sessionFolder = ['m' animalName date];
 
 if isstrprop(sessionName(end), 'alpha')
-    behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];
+    behSessionDataPath = [root animalName sep sessionFolder sep 'sortedTraining' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];
 else
-    behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
+    behSessionDataPath = [root animalName sep sessionFolder sep 'sortedTraining' sep 'session' sep sessionName '_sessionData_behav.mat'];
 end
 
 if coupledFlag  
@@ -27,7 +27,7 @@ else
     if exist(behSessionDataPath,'file')
         load(behSessionDataPath)
     else
-        [behSessionData, blockSwitch] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupledTraining(sessionName);
     end
 end
 
@@ -233,7 +233,7 @@ for i = 1:length(behSessionData)
 %     end
     if (~isnan(behSessionData(i).ManulWaterL))
         plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
-    elseif (~isnan(behSessionData(i).ManulWaterL)) 
+    elseif (~isnan(behSessionData(i).ManulWaterR)) 
         plot([i i],[0 rMag],'g', 'linewidth',4)
     end
     if (~isempty(behSessionData(i).delayNlw))
@@ -303,7 +303,7 @@ for i = 1:length(behSessionData)
 %     end
     if (~isnan(behSessionData(i).ManulWaterL))
         plot([currTime currTime],[-1*nrMag 0],'g')
-    elseif (~isnan(behSessionData(i).ManulWaterL)) 
+    elseif (~isnan(behSessionData(i).ManulWaterR)) 
         plot([currTime currTime],[0 rMag],'g')
     end
 end
@@ -506,7 +506,7 @@ end
 %%
 figure   %make new lick behavior analysis figure
 set(gcf, 'Position', get(0,'Screensize'))
-suptitle(sessionName)
+title(sessionName)
 
 
 %% lick latency and recent rwd hist analysis

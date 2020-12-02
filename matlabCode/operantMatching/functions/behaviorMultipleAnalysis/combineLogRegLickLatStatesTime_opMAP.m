@@ -33,9 +33,10 @@ SwitchLickLat_threat = [];
 for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
-    animalName = animalName(2:end);
+%     animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
+    sessionName = sessionFolder;
 
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName(end) sep sessionName '_sessionData.mat'];
