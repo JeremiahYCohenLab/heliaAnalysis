@@ -232,7 +232,7 @@ for i = 1:length(behSessionData)
 %         j = j + 1;
 %     end
     if (~isnan(behSessionData(i).ManulWaterL))
-        plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
+        plot([i i],[-1*rMag 0],'g', 'linewidth',4)
     elseif (~isnan(behSessionData(i).ManulWaterR)) 
         plot([i i],[0 rMag],'g', 'linewidth',4)
     end

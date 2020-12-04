@@ -1,14 +1,14 @@
-function [sessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatching(sessionName)
+function [sessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatching(sesstmp)
 
 % Determine if computer is PC or Mac and set roots and separators appropriately
 [root, sep] = currComputer();
-[animalName, date] = strtok(sessionName, 'd'); 
+[animalName, date] = strtok(sesstmp, 'd'); 
 animalName = animalName(2:end);
 date = date(1:9);
 sessionFolder = ['m' animalName date];
 
 
-behavioralDataPath = [root animalName sep sessionFolder sep 'behavior' sep sessionName '.asc'];
+behavioralDataPath = [root animalName sep sessionFolder sep 'behavior' sep sesstmp '.asc'];
 sessionText = importData_operantMatching(behavioralDataPath);
 
 sessionData.trialType = [];

@@ -38,12 +38,13 @@ for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
     %animalName = animalName(2:end);
+    sessionName = ['m' sessionName];
     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sep sessionFolder(end) sep sep sessionFolder '_sessionData_behav.mat'];
     else
-        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionFolder '_sessionData_behav.mat'];
+        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
 %     if exist(sessionDataPath,'file')
 %         load(sessionDataPath)
@@ -52,7 +53,7 @@ for i = 1: length(dayList)
 %             [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
 %         end
 %     elseif revForFlag                                    %otherwise generate the struct
-        [behSessionData,blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionFolder);
+        [behSessionData,blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
 % 
 %     else
 %         [sessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
@@ -117,7 +118,7 @@ for i = 1: length(dayList)
                     end
                     rwdMatxTmp_threat_state = [rwdMatxTmp_threat_state NaN(tMax,15) rwdMatxTmp_threat];
                     choiceMatxTmp_threat_state = [choiceMatxTmp_threat_state NaN(tMax,15) choiceMatxTmp_threat];
-                    noRwdMatxTmp_threat_state = [noRwdMatxTmp_threat_state NaN(tMax,15) choiceMatxTmp_threat];
+                    noRwdMatxTmp_threat_state = [noRwdMatxTmp_threat_state NaN(tMax,15) noRwdMatxTmp_threat];
                     airpuffMatxTmp_threat_state = [airpuffMatxTmp_threat_state NaN(tMax,15) airpuffMatxTmp_threat];
                     ChoiceMatxTmp_R_threat_state = [ChoiceMatxTmp_R_threat_state NaN(1,15) allChoice_R(stateChangeInds(currT):stateChangeInds(currT+1)-1)];
                     choiceMatxTmp_threat = [];
@@ -133,7 +134,7 @@ for i = 1: length(dayList)
                      end
                     rwdMatxTmp_safe_state = [rwdMatxTmp_safe_state NaN(tMax,15) rwdMatxTmp_safe];
                     choiceMatxTmp_safe_state = [choiceMatxTmp_safe_state NaN(tMax,15) choiceMatxTmp_safe];
-                    noRwdMatxTmp_safe_state = [noRwdMatxTmp_safe_state NaN(tMax,15) choiceMatxTmp_safe];
+                    noRwdMatxTmp_safe_state = [noRwdMatxTmp_safe_state NaN(tMax,15) noRwdMatxTmp_safe];
                     ChoiceMatxTmp_R_safe_state = [ChoiceMatxTmp_R_safe_state NaN(1,15) allChoice_R(stateChangeInds(currT):stateChangeInds(currT+1)-1)];
                     rwdMatxTmp_safe = [];
                     choiceMatxTmp_safe = [];

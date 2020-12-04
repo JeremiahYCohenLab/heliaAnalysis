@@ -77,4 +77,3 @@ end
 title('Combined Model - No Reward')
 legend('safe', 'threat')
 ylabel('\beta Coefficient')
-suptitle(animal)

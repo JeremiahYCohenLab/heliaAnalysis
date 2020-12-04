@@ -38,6 +38,7 @@ combinedAllChoice_R_threat = [];
 for i = 1: length(dayList)
         sessionName = dayList{i};                       %extract relevant info from session title
         [animalName, date] = strtok(sessionName, 'd'); 
+        sessionName = ['m' sessionName];
         %animalName = animalName(2:end);
         date = date(1:9);
         sessionFolder = ['m' animalName date];
@@ -45,22 +46,22 @@ for i = 1: length(dayList)
         if isstrprop(sessionName(end), 'alpha')         %define appropriate data path
             sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionFolder(end) sep sessionFolder '_sessionData_behav.mat'];
         else
-            sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionFolder '_sessionData_behav.mat'];
+            sessionDataPath = [root animalName sep sessionFolder sep 'sortedap' sep 'session' sep sessionName '_sessionData_behav.mat'];
         end
 
-    %     if exist(sessionDataPath,'file')        %load preprocessed struct if there is one
-    %         load(sessionDataPath)
-    %          behSessionData = sessionData;
-    %         if revForFlag
-    %            behSessionData = sessionData;
-    %         end
-    %     elseif revForFlag                                    %otherwise generate the struct
-            [behSessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionFolder);
+        if exist(sessionDataPath,'file')        %load preprocessed struct if there is one
+            load(sessionDataPath)
+             behSessionData = sessionData;
+            if revForFlag
+               behSessionData = sessionData;
+            end
+        elseif revForFlag                                    %otherwise generate the struct
+            [behSessionData, blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
 
 
-    %     else
-    %         [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
-    %     end
+        else
+            [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+        end
 
         %create arrays for choices and rewards
         responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window

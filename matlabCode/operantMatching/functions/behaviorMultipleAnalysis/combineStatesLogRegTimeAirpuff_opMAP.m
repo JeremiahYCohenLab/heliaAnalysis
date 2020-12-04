@@ -37,6 +37,7 @@ for i = 1: length(dayList)
     animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
+    sessionName = ['m' sessionName];
 
     if isstrprop(sessionName(end), 'alpha')         %define appropriate data path
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_sessionData_behav.mat'];

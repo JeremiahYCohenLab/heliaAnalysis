@@ -23,15 +23,17 @@ allRewardsComb = [];
 for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
-    animalName = animalName(2:end);
+%     animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
+    sessionName = ['m' sessionName];
 
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_sessionData_behav.mat'];
     else
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
+
 
     if revForFlag
         if exist(sessionDataPath,'file')
