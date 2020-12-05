@@ -28,9 +28,10 @@ tMax = 12;
 for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
-%     animalName = animalName(2:end);
+    animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
+    sessionName = ['m' sessionName];
 
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName(end) sep sessionName '_sessionData.mat'];
@@ -44,7 +45,7 @@ for i = 1: length(dayList)
             behSessionData = sessionData;
         end
     else
-        [behSessionData,blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionFolder);
+        [behSessionData,blockSwitch, blockProbs, stateSwitch] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
     end
     
     %%generate reward matrix for tMax trials
