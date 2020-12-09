@@ -25,7 +25,7 @@ if coupledFlag
         [behSessionData, blockSwitch, blockProbs] = generateSessionData_behav_operantMatchingTraining(sessionName);
 else
     if exist(behSessionDataPath,'file')
-        load(behSessionDataPath)
+        load(behSessionDataPath);
     else
         [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupledTraining(sessionName);
     end
