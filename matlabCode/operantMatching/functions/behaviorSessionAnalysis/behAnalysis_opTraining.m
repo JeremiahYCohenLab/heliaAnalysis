@@ -258,6 +258,7 @@ end
 
 rMag = 1;
 nrMag = rMag/2;
+nqrMag = rMag /4;
 
 % trial plot
 subplot(6,8,[1:8]); hold on
@@ -301,7 +302,7 @@ for i = 1:length(behSessionData)
         plot([i i],[0 rMag],'g', 'linewidth',4)
     end
     if (~isempty(behSessionData(i).delayNlw))
-        plot([i i],[rMag 0],'--r', 'linewidth',1)
+        plot([i i],[nqrMag 0],'--r', 'linewidth',1)
     end
 end
 
@@ -568,208 +569,208 @@ end
 
 
 %%
-figure   %make new lick behavior analysis figure
-set(gcf, 'Position', get(0,'Screensize'))
-title(sessionName)
-
-
-%% lick latency and recent rwd hist analysis
-
-timeMax = 61000;
-binSize = 10000;
-timeBinEdges = [1000:binSize:timeMax];  %no trials shorter than 1s between outcome and CS on
-tMax = length(timeBinEdges) - 1;
-rwdTimeMatx = zeros(tMax, length(responseInds));     %initialize matrices for number of response trials x number of time bins
-for j = 2:length(responseInds)          
-    k = 1;
-    %find time between "current" choice and previous rewards, up to timeMax in the past 
-    timeTmp = []; timeTmpN =[];
-    while j-k > 0 & behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime < timeMax
-        if behSessionData(responseInds(j-k)).rewardL == 1 || behSessionData(responseInds(j-k)).rewardR == 1
-            timeTmp = [timeTmp (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
-        end
-        k = k + 1;
-    end
-    %bin outcome times and use to fill matrices
-    if ~isempty(timeTmp)
-        binnedRwds = discretize(timeTmp,timeBinEdges);
-        for k = 1:tMax
-            if ~isempty(find(binnedRwds == k))
-                rwdTimeMatx(k,j) = sum(binnedRwds == k);
-            end
-        end
-    end
-end
-
-%fill in NaNs at beginning of session
-j = 2;
-while behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(1)).rewardTime < timeMax
-    tmpDiff = behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(1)).rewardTime;
-    binnedDiff = discretize(tmpDiff, timeBinEdges);
-    rwdTimeMatx(binnedDiff:tMax,j) = NaN;
-    j = j+1;
-end
-
-rwdTimeMatx(:,1) = NaN;
-glm_rwdLickLat = fitlm([rwdTimeMatx(:,lickLatInds)]', responseLat);                 
-glm_rwdLickRate = fitlm([rwdTimeMatx(:,logical(allRewardsBin))]', lickRate);
-
-%plot beta coefficients from lrm's
-subplot(4,2,1); hold on;
-relevInds = 2:tMax+1;
-coefVals = glm_rwdLickLat.Coefficients.Estimate(relevInds);
-CIbands = coefCI(glm_rwdLickLat);
-errorL = abs(coefVals - CIbands(relevInds,1));
-errorU = abs(coefVals - CIbands(relevInds,2));
-errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
-
-plot([0 (tMax*binSize/1000 + 5)],[0 0],'k--')
-xlabel('reward n seconds back')
-ylabel('\beta Coefficient')
-xlim([0 (tMax*binSize/1000 + 5)])
-title('LRM: rewards in time on lick latency')
-
-subplot(4,2,2); hold on;
-coefVals = glm_rwdLickRate.Coefficients.Estimate(relevInds);
-CIbands = coefCI(glm_rwdLickRate);
-errorL = abs(coefVals - CIbands(relevInds,1));
-errorU = abs(coefVals - CIbands(relevInds,2));
-errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
-
-plot([0 (tMax*binSize/1000 + 5)],[0 0],'k--')
-xlabel('reward n seconds back')
-ylabel('\beta Coefficient')
-xlim([0 (tMax*binSize/1000 + 5)])
-title('LRM: rewards in time on lick rate')
-
-%plot reward history smoothed with kernel derived from beta coefficients (licks) v lick behavior 
-purp = [0.5 0 0.8];
-blue = [0 0 1];
-set(gcf,'defaultAxesColorOrder',[blue; purp]);
-
-rwdsSmooth = fastsmooth(allRewardsBin, 5, 3);
-
-subplot(4,2,3)
-yyaxis left; plot(rwdsSmooth(lickLatInds), 'b'); hold on
-ylabel('Reward History (from lick LRM)')
-yyaxis right; plot(fastsmooth(responseLat,5,3),'-','Color', purp);
-ylabel('Response Latency Z-Score')
-xlabel('Choice Trials')
-
-
-subplot(4,2,4)
-yyaxis left; plot(rwdsSmooth(logical(allRewardsBin)), 'b'); hold on
-ylabel('Reward History (from lick LRM)')
-yyaxis right; plot(fastsmooth(lickRate,5,3),'-','Color', purp);
-ylabel('Peak Lick Rate Z-Score')
-xlabel('Rewarded Trials')
-
-%plot scatters for reward history smoothed with kernel derived from beta coefficients (choices) v lick behavior  
-expFit = singleExpFit(glm_rwdANDnoRwd.Coefficients.Estimate(2:end));
-expConv = expFit.a*exp(-(1/expFit.b)*(1:10));
-expConv = expConv./sum(expConv);
-rwdHx = conv(allRewardsBin,expConv);
-rwdHx = rwdHx(1:end-(length(expConv)-1)); 
-
-rwdHxLick = rwdHx(lickLatInds);                   %remove preemptive lick trials from rwd hist
-
-coeffs = polyfit(rwdHxLick, responseLat, 1);
-fittedX = linspace(0, 1, 200);
-fittedY = polyval(coeffs, fittedX);
-mdl = fitlm(rwdHxLick, responseLat);
-rSqr = mdl.Rsquared(1).Ordinary(1);
-
-purp = [0.5 0 0.8];
-blue = [0 0 1];
-set(gcf,'defaultAxesColorOrder',[blue; purp]);
-
-subplot(4,2,5)
-scatter(rwdHxLick, responseLat,'b'); hold on
-ylabel('Lick Latency Z Score')
-xlabel('Reward History (from choice LRM)')
-plot(fittedX, fittedY, '-','Color', purp, 'LineWidth', 3);
-legend('Licks', sprintf(['R^2: ' num2str(rSqr)]))
-
-%
-rewardsLick = allRewards(allRewards == 1 | allRewards == -1);
-if behSessionData(responseInds(1)).rewardR == 1      %remove first response for shift to compare to rwd hist
-    responseRate_R = lickRate_R(2:end);
-    responseRate_L = lickRate_L;
-    responseRate = lickRate(2:end);
-    responseRateInds = find(lickRate(2:end) < 15);
-    rewardsLick = rewardsLick(2:end);
-elseif behSessionData(responseInds(1)).rewardL == 1 
-    responseRate_R = lickRate_R;
-    responseRate_L = lickRate_L(2:end);
-    responseRate = lickRate(2:end);
-    responseRateInds = find(lickRate(2:end) < 15);
-    rewardsLick = rewardsLick(2:end);
-else
-    responseRate_R = lickRate_R;
-    responseRate_L = lickRate_L;
-    responseRate = lickRate;
-    responseRateInds = find(lickRate < 15);
-end
-
-
-responseRate = responseRate(responseRate < 15);
-responseRate_R = responseRate_R(responseRate_R < 15);
-responseRate_L = responseRate_L(responseRate_L < 15);
-responseRate_R = zscore(responseRate_R);
-responseRate_L = zscore(responseRate_L);
-rewardsLick = rewardsLick(responseRateInds);
-
-L = 1;
-R = 1;
-for j = 1:length(rewardsLick)                     %put z scored lick rates back in trial order
-    if rewardsLick(j) == 1
-        responseRate(j) = responseRate_R(R);
-        R = R + 1;
-    elseif rewardsLick(j) == -1
-        responseRate(j) = responseRate_L(L);
-        L = L + 1;
-    end
-end
-
-
-binAllRewards = logical(allRewards == 1 | allRewards == -1);
-rwdHxRwd = rwdHx(binAllRewards(2:end)==1);
-rwdHxRwd = rwdHxRwd(responseRateInds);
-
-
-coeffs2 = polyfit(rwdHxRwd, responseRate, 1);
-fittedY2 = polyval(coeffs2, fittedX);
-mdl2 = fitlm(rwdHxRwd, responseRate);
-rSqr2 = mdl2.Rsquared(1).Ordinary(1);
-
-subplot(4,2,6)
-scatter(rwdHxRwd, responseRate, 'b'); hold on;
-xlabel('Reward History (from choice LRM)')
-ylabel('Peak Lick Rate Z-Score')
-plot(fittedX, fittedY2, '-','Color', purp, 'LineWidth', 3);
-legend('Licks', sprintf(['R^2: ' num2str(rSqr2)]))
-
-
-subplot(4,2,7)
-yyaxis left; plot(fastsmooth(rwdHxLick, 5, 3), 'b'); hold on
-ylabel('Reward History (from choice LRM)')
-yyaxis right; plot(fastsmooth(responseLat,5,3),'-','Color', purp);
-ylabel('Response Latency Z-Score')
-xlabel('Choice Trials')
-
-subplot(4,2,8)
-yyaxis left; plot(fastsmooth(rwdHxRwd, 5, 3), 'b'); hold on
-ylabel('Reward History (from choice LRM)')
-yyaxis right; plot(fastsmooth(responseRate,5,3),'-','Color', purp);
-ylabel('Peak Lick Rate Z-Score')
-xlabel('Rewarded Trials')
-
-
-savePath = [root animalName sep sessionFolder sep  'figuresTraining' sep];
-if isempty(dir(savePath))
-    mkdir(savePath)
-end
-
-if saveFigFlag == 1
-    saveFigurePDF(gcf,[savePath sep sessionName '_lickBehavior'])
-end
+% figure   %make new lick behavior analysis figure
+% set(gcf, 'Position', get(0,'Screensize'))
+% title(sessionName)
+% 
+% 
+% %% lick latency and recent rwd hist analysis
+% 
+% timeMax = 61000;
+% binSize = 10000;
+% timeBinEdges = [1000:binSize:timeMax];  %no trials shorter than 1s between outcome and CS on
+% tMax = length(timeBinEdges) - 1;
+% rwdTimeMatx = zeros(tMax, length(responseInds));     %initialize matrices for number of response trials x number of time bins
+% for j = 2:length(responseInds)          
+%     k = 1;
+%     %find time between "current" choice and previous rewards, up to timeMax in the past 
+%     timeTmp = []; timeTmpN =[];
+%     while j-k > 0 & behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime < timeMax
+%         if behSessionData(responseInds(j-k)).rewardL == 1 || behSessionData(responseInds(j-k)).rewardR == 1
+%             timeTmp = [timeTmp (behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(j-k)).rewardTime)];
+%         end
+%         k = k + 1;
+%     end
+%     %bin outcome times and use to fill matrices
+%     if ~isempty(timeTmp)
+%         binnedRwds = discretize(timeTmp,timeBinEdges);
+%         for k = 1:tMax
+%             if ~isempty(find(binnedRwds == k))
+%                 rwdTimeMatx(k,j) = sum(binnedRwds == k);
+%             end
+%         end
+%     end
+% end
+% 
+% %fill in NaNs at beginning of session
+% j = 2;
+% while behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(1)).rewardTime < timeMax
+%     tmpDiff = behSessionData(responseInds(j)).rewardTime - behSessionData(responseInds(1)).rewardTime;
+%     binnedDiff = discretize(tmpDiff, timeBinEdges);
+%     rwdTimeMatx(binnedDiff:tMax,j) = NaN;
+%     j = j+1;
+% end
+% 
+% rwdTimeMatx(:,1) = NaN;
+% glm_rwdLickLat = fitlm([rwdTimeMatx(:,lickLatInds)]', responseLat);                 
+% glm_rwdLickRate = fitlm([rwdTimeMatx(:,logical(allRewardsBin))]', lickRate);
+% 
+% %plot beta coefficients from lrm's
+% subplot(4,2,1); hold on;
+% relevInds = 2:tMax+1;
+% coefVals = glm_rwdLickLat.Coefficients.Estimate(relevInds);
+% CIbands = coefCI(glm_rwdLickLat);
+% errorL = abs(coefVals - CIbands(relevInds,1));
+% errorU = abs(coefVals - CIbands(relevInds,2));
+% errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+% 
+% plot([0 (tMax*binSize/1000 + 5)],[0 0],'k--')
+% xlabel('reward n seconds back')
+% ylabel('\beta Coefficient')
+% xlim([0 (tMax*binSize/1000 + 5)])
+% title('LRM: rewards in time on lick latency')
+% 
+% subplot(4,2,2); hold on;
+% coefVals = glm_rwdLickRate.Coefficients.Estimate(relevInds);
+% CIbands = coefCI(glm_rwdLickRate);
+% errorL = abs(coefVals - CIbands(relevInds,1));
+% errorU = abs(coefVals - CIbands(relevInds,2));
+% errorbar(((1:tMax)*binSize/1000),coefVals,errorL,errorU,'Color', [0.7 0 1],'linewidth',2)
+% 
+% plot([0 (tMax*binSize/1000 + 5)],[0 0],'k--')
+% xlabel('reward n seconds back')
+% ylabel('\beta Coefficient')
+% xlim([0 (tMax*binSize/1000 + 5)])
+% title('LRM: rewards in time on lick rate')
+% 
+% %plot reward history smoothed with kernel derived from beta coefficients (licks) v lick behavior 
+% purp = [0.5 0 0.8];
+% blue = [0 0 1];
+% set(gcf,'defaultAxesColorOrder',[blue; purp]);
+% 
+% rwdsSmooth = fastsmooth(allRewardsBin, 5, 3);
+% 
+% subplot(4,2,3)
+% yyaxis left; plot(rwdsSmooth(lickLatInds), 'b'); hold on
+% ylabel('Reward History (from lick LRM)')
+% yyaxis right; plot(fastsmooth(responseLat,5,3),'-','Color', purp);
+% ylabel('Response Latency Z-Score')
+% xlabel('Choice Trials')
+% 
+% 
+% subplot(4,2,4)
+% yyaxis left; plot(rwdsSmooth(logical(allRewardsBin)), 'b'); hold on
+% ylabel('Reward History (from lick LRM)')
+% yyaxis right; plot(fastsmooth(lickRate,5,3),'-','Color', purp);
+% ylabel('Peak Lick Rate Z-Score')
+% xlabel('Rewarded Trials')
+% 
+% %plot scatters for reward history smoothed with kernel derived from beta coefficients (choices) v lick behavior  
+% expFit = singleExpFit(glm_rwdANDnoRwd.Coefficients.Estimate(2:end));
+% expConv = expFit.a*exp(-(1/expFit.b)*(1:10));
+% expConv = expConv./sum(expConv);
+% rwdHx = conv(allRewardsBin,expConv);
+% rwdHx = rwdHx(1:end-(length(expConv)-1)); 
+% 
+% rwdHxLick = rwdHx(lickLatInds);                   %remove preemptive lick trials from rwd hist
+% 
+% coeffs = polyfit(rwdHxLick, responseLat, 1);
+% fittedX = linspace(0, 1, 200);
+% fittedY = polyval(coeffs, fittedX);
+% mdl = fitlm(rwdHxLick, responseLat);
+% rSqr = mdl.Rsquared(1).Ordinary(1);
+% 
+% purp = [0.5 0 0.8];
+% blue = [0 0 1];
+% set(gcf,'defaultAxesColorOrder',[blue; purp]);
+% 
+% subplot(4,2,5)
+% scatter(rwdHxLick, responseLat,'b'); hold on
+% ylabel('Lick Latency Z Score')
+% xlabel('Reward History (from choice LRM)')
+% plot(fittedX, fittedY, '-','Color', purp, 'LineWidth', 3);
+% legend('Licks', sprintf(['R^2: ' num2str(rSqr)]))
+% 
+% %
+% rewardsLick = allRewards(allRewards == 1 | allRewards == -1);
+% if behSessionData(responseInds(1)).rewardR == 1      %remove first response for shift to compare to rwd hist
+%     responseRate_R = lickRate_R(2:end);
+%     responseRate_L = lickRate_L;
+%     responseRate = lickRate(2:end);
+%     responseRateInds = find(lickRate(2:end) < 15);
+%     rewardsLick = rewardsLick(2:end);
+% elseif behSessionData(responseInds(1)).rewardL == 1 
+%     responseRate_R = lickRate_R;
+%     responseRate_L = lickRate_L(2:end);
+%     responseRate = lickRate(2:end);
+%     responseRateInds = find(lickRate(2:end) < 15);
+%     rewardsLick = rewardsLick(2:end);
+% else
+%     responseRate_R = lickRate_R;
+%     responseRate_L = lickRate_L;
+%     responseRate = lickRate;
+%     responseRateInds = find(lickRate < 15);
+% end
+% 
+% 
+% responseRate = responseRate(responseRate < 15);
+% responseRate_R = responseRate_R(responseRate_R < 15);
+% responseRate_L = responseRate_L(responseRate_L < 15);
+% responseRate_R = zscore(responseRate_R);
+% responseRate_L = zscore(responseRate_L);
+% rewardsLick = rewardsLick(responseRateInds);
+% 
+% L = 1;
+% R = 1;
+% for j = 1:length(rewardsLick)                     %put z scored lick rates back in trial order
+%     if rewardsLick(j) == 1
+%         responseRate(j) = responseRate_R(R);
+%         R = R + 1;
+%     elseif rewardsLick(j) == -1
+%         responseRate(j) = responseRate_L(L);
+%         L = L + 1;
+%     end
+% end
+% 
+% 
+% binAllRewards = logical(allRewards == 1 | allRewards == -1);
+% rwdHxRwd = rwdHx(binAllRewards(2:end)==1);
+% rwdHxRwd = rwdHxRwd(responseRateInds);
+% 
+% 
+% coeffs2 = polyfit(rwdHxRwd, responseRate, 1);
+% fittedY2 = polyval(coeffs2, fittedX);
+% mdl2 = fitlm(rwdHxRwd, responseRate);
+% rSqr2 = mdl2.Rsquared(1).Ordinary(1);
+% 
+% subplot(4,2,6)
+% scatter(rwdHxRwd, responseRate, 'b'); hold on;
+% xlabel('Reward History (from choice LRM)')
+% ylabel('Peak Lick Rate Z-Score')
+% plot(fittedX, fittedY2, '-','Color', purp, 'LineWidth', 3);
+% legend('Licks', sprintf(['R^2: ' num2str(rSqr2)]))
+% 
+% 
+% subplot(4,2,7)
+% yyaxis left; plot(fastsmooth(rwdHxLick, 5, 3), 'b'); hold on
+% ylabel('Reward History (from choice LRM)')
+% yyaxis right; plot(fastsmooth(responseLat,5,3),'-','Color', purp);
+% ylabel('Response Latency Z-Score')
+% xlabel('Choice Trials')
+% 
+% subplot(4,2,8)
+% yyaxis left; plot(fastsmooth(rwdHxRwd, 5, 3), 'b'); hold on
+% ylabel('Reward History (from choice LRM)')
+% yyaxis right; plot(fastsmooth(responseRate,5,3),'-','Color', purp);
+% ylabel('Peak Lick Rate Z-Score')
+% xlabel('Rewarded Trials')
+% 
+% 
+% savePath = [root animalName sep sessionFolder sep  'figuresTraining' sep];
+% if isempty(dir(savePath))
+%     mkdir(savePath)
+% end
+% 
+% if saveFigFlag == 1
+%     saveFigurePDF(gcf,[savePath sep sessionName '_lickBehavior'])
+% end

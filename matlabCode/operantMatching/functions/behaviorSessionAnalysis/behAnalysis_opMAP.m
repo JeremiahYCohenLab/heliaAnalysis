@@ -18,7 +18,7 @@ sessionFolder = ['m' animalName date];
 if isstrprop(sessionName(end), 'alpha')
     behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];
 else
-    behSessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
+    behSessionDataPath = [root animalName sep sessionFolder sep 'sortedap' sep 'session' sep sessionName '_sessionData_behav.mat'];
 end
 
 if coupledFlag

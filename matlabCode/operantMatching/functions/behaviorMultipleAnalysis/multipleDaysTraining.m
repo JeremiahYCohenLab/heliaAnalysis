@@ -190,6 +190,7 @@ end
 
     rMag = 1;
     nrMag = rMag/2;
+    nqrMag = rMag/4;
 
     % trial plot
     
@@ -221,7 +222,7 @@ end
             end
              % CSplus trial but no rewardL or rewardR
             if (~isempty(behSessionData(i).delayNlw))
-                plot([i i],[rMag 0],'--r','linewidth',1)
+                plot([i i],[nqrMag 0],'--r','linewidth',1)
   %%when animal does not lick or licks in delay so many times thaty it moves to next trial
 
             end

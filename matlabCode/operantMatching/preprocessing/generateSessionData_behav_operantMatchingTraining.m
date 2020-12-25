@@ -199,7 +199,7 @@ for i = 1:length(sessionText)
  end
 savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sortedTraining' sep 'session' sep];
 if isempty(dir(savepath))
-    mkdir(savepath)
+    mkdir(savepath);
 end
 
 f_IndA = find(behavioralDataPath==sep,1,'last');

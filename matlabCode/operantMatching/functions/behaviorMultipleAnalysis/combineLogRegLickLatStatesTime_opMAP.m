@@ -1,9 +1,9 @@
-function [glm_rwdLickSafe, glm_rwdLickThreat, StayLickLat_safe, SwitchLickLat_safe, StayLickLat_threat, SwitchLickLat_threat,  binSize, timeMax, tMax] = combineLogRegLickLatStatesTime_opMAP(xlFile, animal, category,revForFlag, varargin)
+function [glm_rwdLickSafe, glm_rwdLickThreat, glm_rwdLickSafeOrg, glm_rwdLickThreatOrg,StayLickLat_safe, SwitchLickLat_safe, StayLickLat_threat, SwitchLickLat_threat, StayLickLatOrg_safe, SwitchLickLatOrg_safe, StayLickLatOrg_threat,SwitchLickLatOrg_threat, binSize, timeMax, tMax] = combineLogRegLickLatStatesTime_opMAP(xlFile, animal, category,revForFlag, varargin)
 
 p = inputParser;
 % default parameters if none given
-p.addParameter('revForFlag',0)
-p.addParameter('plotFlag', 0)
+p.addParameter('revForFlag',0);
+p.addParameter('plotFlag', 0);
 p.parse(varargin{:});
 
 [root, sep] = currComputer();
@@ -22,12 +22,18 @@ timeBinEdges = [1000:binSize:timeMax];  %no trials shorter than 1s between outco
 tMax = length(timeBinEdges) - 1;
 combinedLickLat_safe = [];
 combinedLickLat_threat = [];
+combinedLickLatOrg_safe = [];
+combinedLickLatOrg_threat = [];
 StayLickLat_safe = []; 
 SwitchLickLat_safe = [];
+StayLickLatOrg_safe = []; 
+SwitchLickLatOrg_safe = [];
 rwdMatx_safe = [];
 rwdMatx_threat = [];
 StayLickLat_threat = [];
 SwitchLickLat_threat = [];
+StayLickLatOrg_threat = [];
+SwitchLickLatOrg_threat = [];
 
 
 for i = 1: length(dayList)
@@ -41,11 +47,11 @@ for i = 1: length(dayList)
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName(end) sep sessionName '_sessionData.mat'];
     else
-        sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sessionName '_sessionData.mat'];
+        sessionDataPath = [root animalName sep sessionFolder sep 'sortedAP' sep 'session' sessionName '_sessionData.mat'];
     end
 
     if exist(sessionDataPath,'file')
-        load(sessionDataPath)
+        load(sessionDataPath);
         if p.Results.revForFlag
             behSessionData = sessionData;
         end
@@ -128,9 +134,28 @@ rwdTmpMatx = zeros(tMax, length(responseInds));
     indsL = find(allChoices == -1);
     lickLat_R = zscore(lickLat(indsR));
     lickLat_L = zscore(lickLat(indsL));
+
+    
+    lickLat_ROrg = lickLat(indsR);
+    lickLat_LOrg = lickLat(indsL);
+    
     lickLat = NaN(1, length(allChoices));
     lickLat(indsR) = lickLat_R;
     lickLat(indsL) = lickLat_L;
+    
+    lickLatOrg = NaN(1, length(allChoices));
+    lickLatOrg(indsR) = lickLat_ROrg;
+    lickLatOrg(indsL) = lickLat_LOrg;
+    
+  combinedLickLatOrg_threat_state = [];    
+%   changeChoice_threat_state = [];
+  StayLickLatOrg_threat_state = []; 
+  SwitchLickLatOrg_threat_state = [];
+  combinedLickLatOrg_safe_state = [];
+%   changeChoice_safe_state = [];
+  StayLickLatOrg_safe_state = []; 
+  SwitchLickLatOrg_safe_state = []; 
+  
     
   combinedLickLat_threat_state = [];    
   changeChoice_threat_state = [];
@@ -165,12 +190,38 @@ rwdTmpMatx = zeros(tMax, length(responseInds));
 %         changeChoice_threat = [changeChoice_threat changeChoice_threat_state];
         StayLickLat_threat = [StayLickLat_threat StayLickLat_threat_state]; 
         SwitchLickLat_threat = [SwitchLickLat_threat SwitchLickLat_threat_state];
+        
+        for currT = 1:length(stateChangeInds)-1   %% determine lick latency for stay v switch trials for safe and threat sepearetaly
+         if(stateChangeInds(currT+1)-1 - stateChangeInds(currT) >= 12)
+            if stateType(stateChangeInds(currT)) == 1 %plus 2 to not look at the first lick lat
+                combinedLickLatOrg_threat_state = [combinedLickLatOrg_threat_state NaN(1,16) lickLatOrg(stateChangeInds(currT)+1:stateChangeInds(currT+1)-1)];
+%                 changeChoice_threat_state = [false abs(diff(allChoices(stateChangeInds(currT-1)+1:stateChangeInds(currT)-1))) > 0];
+                StayLickLatOrg_threat_state = [StayLickLatOrg_threat_state  lickLatOrg(~changeChoice(stateChangeInds(currT):stateChangeInds(currT+1)-1))]; 
+                SwitchLickLatOrg_threat_state = [SwitchLickLatOrg_threat_state  lickLatOrg(changeChoice(stateChangeInds(currT):stateChangeInds(currT+1)-1))];
+            else
+                combinedLickLatOrg_safe_state = [combinedLickLatOrg_safe_state NaN(1,16) lickLatOrg(stateChangeInds(currT)+1:stateChangeInds(currT+1)-1)];
+%                 changeChoice_safe_state = [false abs(diff(allChoices(stateChangeInds(currT-1)+1:stateChangeInds(currT)-1))) > 0];
+                StayLickLatOrg_safe_state = [StayLickLatOrg_safe_state  lickLatOrg(~changeChoice(stateChangeInds(currT):stateChangeInds(currT+1)-1))]; 
+                SwitchLickLatOrg_safe_state = [SwitchLickLatOrg_safe_state   lickLatOrg(changeChoice(stateChangeInds(currT):stateChangeInds(currT+1)-1))];
+            end
+         end
+       end
+        combinedLickLatOrg_safe = [combinedLickLatOrg_safe NaN(1,100) combinedLickLatOrg_safe_state];
+        combinedLickLatOrg_threat = [combinedLickLatOrg_threat NaN(1,100) combinedLickLatOrg_threat_state];
+%         changeChoice_safe = [changeChoice_safe changeChoice_safe_state];
+        StayLickLatOrg_safe = [StayLickLatOrg_safe StayLickLatOrg_safe_state]; 
+        SwitchLickLatOrg_safe = [SwitchLickLatOrg_safe SwitchLickLatOrg_safe_state];
+%         changeChoice_threat = [changeChoice_threat changeChoice_threat_state];
+        StayLickLatOrg_threat = [StayLickLatOrg_threat StayLickLatOrg_threat_state]; 
+        SwitchLickLatOrg_threat = [SwitchLickLatOrg_threat SwitchLickLatOrg_threat_state];
+
 end
 
-
-%linear regression model
 glm_rwdLickSafe = fitglm([rwdMatx_safe]', combinedLickLat_safe);
 glm_rwdLickThreat = fitglm([rwdMatx_threat]', combinedLickLat_threat);
+%linear regression model
+glm_rwdLickSafeOrg = fitglm([rwdMatx_safe]', combinedLickLatOrg_safe);
+glm_rwdLickThreatOrg = fitglm([rwdMatx_threat]', combinedLickLatOrg_threat);
 end% if p.Results.plotFlag
 %     figure; hold on
 %     relevInds = 2:timeMax+1;

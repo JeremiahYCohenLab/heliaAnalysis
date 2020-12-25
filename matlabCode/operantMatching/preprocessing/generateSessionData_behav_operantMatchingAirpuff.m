@@ -69,6 +69,10 @@ for i = 1:length(sessionText)
                 stateSwitch = [stateSwitch currTrial];
                 temp5 = regexp(sessionText{i-2}, ': ', 'split');
                 sessionData(currTrial).stateType = str2double(temp5{1,2});
+            elseif ~isempty(strfind(sessionText{i-3}, 'State Switch'))
+                stateSwitch = [stateSwitch currTrial];
+                temp5 = regexp(sessionText{i-3}, ': ', 'split');
+                sessionData(currTrial).stateType = str2double(temp5{1,2});
             else
                 sessionData(currTrial).stateType = sessionData(currTrial-1).stateType ;
             end
@@ -203,7 +207,7 @@ for i = 1:length(sessionText)
 end
 savepath = [behavioralDataPath(1:strfind(behavioralDataPath,'behavior')-1) 'sortedap' sep 'session' sep];
 if isempty(dir(savepath))
-    mkdir(savepath)
+    mkdir(savepath);
 end
 
 f_IndA = find(behavioralDataPath==sep,1,'last');
