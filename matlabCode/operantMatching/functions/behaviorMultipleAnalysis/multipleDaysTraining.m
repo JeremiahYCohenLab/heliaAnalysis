@@ -28,7 +28,7 @@ for d = 1: length(dayList)
     sessionName = ['m' sessionName];
     [animalName, date] = strtok(sessionName, 'd'); 
     animalName = animal;
-    date = date(1:9);
+%     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
         behSessionDataPath = [root animalName sep sessionFolder sep 'sortedTraining' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behavTraining.mat'];
@@ -238,7 +238,7 @@ end
     %     end
         if (~isnan(behSessionData(i).ManulWaterL))
             plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
-        elseif (~isnan(behSessionData(i).ManulWaterL)) 
+        elseif (~isnan(behSessionData(i).ManulWaterR)) 
             plot([i i],[0 nrMag],'g', 'linewidth',4)
         end
 %         if (~isempty(behSessionData(i).delayNlw))

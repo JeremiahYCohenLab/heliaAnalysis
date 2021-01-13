@@ -28,7 +28,7 @@ for d = 1: length(dayList)
     sessionName = ['m' sessionName];
     [animalName, date] = strtok(sessionName, 'd'); 
     animalName = animal;
-    date = date(1:9);
+%     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
         behSessionDataPath = [root animalName sep sessionFolder sep 'sortedap' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];
@@ -195,11 +195,12 @@ end
 
     rMag = 1;
     nrMag = rMag/2;
+    nqrMag = rMag/4;
 
     % trial plot
     subplot(daysBack+1,5,[((5*d)-4) ((5*d)-1)]); hold on;
-    aha = annotation(hf, 'textbox',[0.691 0.5 0.691 0.5],'String', '        safe', 'BackgroundColor',[255,240,245]./255, 'FitBoxToText','on'); hold on;
-    bha = annotation(hf, 'textbox',[0.639 0.5 0.639 0.5],'String', 'under threat', 'BackgroundColor',[255,255,0]./255, 'FitBoxToText','on'); hold on; 
+%     aha = annotation(hf, 'textbox',[0.691 0.5 0.691 0.5],'String', '        safe', 'BackgroundColor',[255,240,245]./255, 'FitBoxToText','on'); hold on;
+%     bha = annotation(hf, 'textbox',[0.639 0.5 0.639 0.5],'String', 'under threat', 'BackgroundColor',[255,255,0]./255, 'FitBoxToText','on'); hold on; 
     normKern = normpdf(-15:15,0,4);
     normKern = normKern / sum(normKern);
     smoothRew = conv(allRewards,normKern)/max(conv(allRewards,normKern));
@@ -227,7 +228,7 @@ end
             end
              % CSplus trial but no rewardL or rewardR
             if (~isempty(behSessionData(i).delayNlw))
-                plot([i i],[rMag 0],'--r','linewidth',1)
+                plot([i i],[nqrMag 0],'--r','linewidth',1)
   %%when animal does not lick or licks in delay so many times thaty it moves to next trial
 
             end
@@ -243,7 +244,7 @@ end
     %     end
         if (~isnan(behSessionData(i).ManulWaterL))
             plot([i i],[-1*nrMag 0],'g', 'linewidth',4)
-        elseif (~isnan(behSessionData(i).ManulWaterL)) 
+        elseif (~isnan(behSessionData(i).ManulWaterR)) 
             plot([i i],[0 nrMag],'g', 'linewidth',4)
         end
     end

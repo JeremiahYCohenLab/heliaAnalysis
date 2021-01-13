@@ -39,7 +39,7 @@ for i = 1: length(dayList)
     end
 
     if exist(sessionDataPath,'file')
-        load(sessionDataPath)
+        load(sessionDataPath);
         if p.Results.revForFlag
             behSessionData = sessionData;
         end
@@ -148,13 +148,13 @@ for i = 1:length(cumsum_stateSwitch)
         xval = [cumsum_stateSwitch(i) cumsum_stateSwitch(i+1)];
         yval = [cumsum_stateSwitch(i) cumsum_stateSwitch(i+1)]*avgRwdSlope(i) - cumsum_stateSwitch(i)*avgRwdSlope(i) + cumsum_allRchoice(combinedtStateSwitch(i));
         tempMax = yval(2);
-        plot(xval, yval, 'k','linewidth',2);
+        plot(xval, yval, 'y','linewidth',2);
     else
         avgRwdSlope(i) = tand(mean(rwdSlope(combinedBlockSwitch(i):end)));
         xval = [cumsum_stateSwitch(i) cumsum_allLchoice(end)];
         yval = [cumsum_stateSwitch(i) cumsum_allLchoice(end)]*avgRwdSlope(i) - cumsum_stateSwitch(i)*avgRwdSlope(i) + cumsum_allRchoice(combinedtStateSwitch(i));
         tempMax = yval(2);
-        plot(xval, yval, 'k','linewidth',2);
+        plot(xval, yval, 'y','linewidth',2);
     end
 end
 limMax = max([max(cumsum_allLchoice) max(cumsum_allRchoice)]);

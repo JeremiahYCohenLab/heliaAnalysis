@@ -22,16 +22,17 @@ combinedRewardsMatx = [];
 combinedNoRewardsMatx = [];
 combinedTimesMatx = [];
 combinedAllChoice_R = [];
-combinedAirpuff_num = [];
+% combinedAirpuff_num = [];
 tMax = 12;
  
 
 for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
-    animalName = animalName(2:end);
+%     animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
+    sessionName = ['m' sessionName];
 
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session ' sessionName(end) sep sessionName '_sessionData_behav.mat'];
@@ -39,22 +40,22 @@ for i = 1: length(dayList)
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName '_sessionData_behav.mat'];
     end
     if exist(sessionDataPath,'file')
-        load(sessionDataPath)
-        behSessionData = sessionData;
+        load(sessionDataPath);
+%         behSessionData = sessionData;
         if revForFlag
             [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
         end
     elseif revForFlag                                    %otherwise generate the struct
-        [behsessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
+        [behSessionData, ~] = generateSessionData_behav_operantMatchingAirpuff(sessionName);
 
     else
-        [sessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
+        [behSessionData, ~, ~, ~] = generateSessionData_operantMatchingDecoupled(sessionName);
     end
     
     
     responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window
     omitInds = isnan([behSessionData.rewardTime]); 
-    airpuff_numind = find([behSessionData.AirpuffTimeOn]);
+%     airpuff_numind = find([behSessionData.AirpuffTimeOn]);
     allReward_R = [behSessionData(responseInds).rewardR]; 
     allReward_L = [behSessionData(responseInds).rewardL]; 
     allChoices = NaN(1,length(behSessionData(responseInds)));
@@ -100,17 +101,17 @@ for i = 1: length(dayList)
             rwdsTmp(j,k+j) = sum(allRewards(k:k+j-1));
         end
     end
-    airpuff_num = size(airpuff_numind);
+%     airpuff_num = size(airpuff_numind);
     rwdRateMatx = [rwdRateMatx NaN(tMax, 100) (rwdsTmp ./ timeTmp)];
     combinedRewardsMatx = [combinedRewardsMatx NaN(tMax,100) rwdMatxTmp];
     combinedNoRewardsMatx = [combinedNoRewardsMatx NaN(tMax,100) noRwdMatxTmp];
     combinedChoicesMatx = [combinedChoicesMatx NaN(tMax,100) choiceMatxTmp];
     combinedTimesMatx = [combinedTimesMatx NaN(tMax, 100) timeTmp];
     combinedAllChoice_R = [combinedAllChoice_R NaN(1,100) allChoice_R];
-    combinedAirpuff_num = [combinedAirpuff_num airpuff_num];
+%     combinedAirpuff_num = [combinedAirpuff_num airpuff_num];
 end
 
-ave_combinedAirpuff_num = ((sum(combinedAirpuff_num)-length(dayList)))/length(dayList);
+% ave_combinedAirpuff_num = ((sum(combinedAirpuff_num)-length(dayList)))/length(dayList);
 
 %logistic regression models
 glm_rwd = fitglm([combinedRewardsMatx]', combinedAllChoice_R,'distribution','binomial','link','logit'); rsq{1} = num2str(round(glm_rwd.Rsquared.Adjusted*100)/100);
@@ -146,6 +147,6 @@ if plotFlag
     title([animal ' ' category])
 end
 
-disp(ave_combinedAirpuff_num);
-disp((sum(combinedAirpuff_num)-length(dayList)));
-disp(combinedAirpuff_num);
+% disp(ave_combinedAirpuff_num);
+% disp((sum(combinedAirpuff_num)-length(dayList)));
+% disp(combinedAirpuff_num);

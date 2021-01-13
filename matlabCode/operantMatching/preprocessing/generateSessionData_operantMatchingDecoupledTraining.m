@@ -166,7 +166,7 @@ for i = 1:length(sessionText)
                 else
                     behSessionData(currTrial).trialEnd = NaN;
                 end
-            end
+        end
         if regexp(sessionText{currTrialInd},'L Block Switch at Trial ')
             if currTrial ~= 1
                 blockSwitch = [blockSwitch currTrial];

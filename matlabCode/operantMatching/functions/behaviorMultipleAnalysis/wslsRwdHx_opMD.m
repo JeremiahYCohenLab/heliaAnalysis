@@ -43,7 +43,7 @@ for i = 1:length(animals)
         end
 
         if exist(sessionDataPath,'file')
-            load(sessionDataPath)
+            load(sessionDataPath);
             if revForFlag
                 behSessionData = sessionData;
             end

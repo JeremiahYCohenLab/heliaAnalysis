@@ -26,6 +26,7 @@ if coupledFlag
 else
     if exist(behSessionDataPath,'file')
         load(behSessionDataPath);
+        
     else
         [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupledTraining(sessionName);
     end
@@ -74,7 +75,7 @@ normKern = normpdf(-15:15,0,4);
 normKern = normKern / sum(normKern);
 xVals = (1:(length(normKern) + length(allChoices) - 1)) - round(length(normKern)/2);
 plot(xVals, conv(allChoices,normKern)/max(conv(allChoices,normKern)),'k','linewidth',2);
-plot(xVals, conv(allRewards,normKern)/max(conv(allRewards,normKern)),'--','Color',[100 100 100]./255,'linewidth',2)
+plot(xVals, conv(allRewards,normKern)/max(conv(allRewards,normKern)),'--','Color',[100 100 100]./255,'linewidth',2);
 xlabel('Trials')
 ylabel('<-- Left       Right -->')
 legend('Choices','Rewards')

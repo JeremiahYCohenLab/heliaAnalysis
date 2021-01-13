@@ -9,6 +9,8 @@ function [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSes
 animalName = animalName(2:end);
 date = date(1:9);
 sessionFolder = ['m' animalName date];
+% sessionName = ['m' sessionName];
+
 filepath = [root animalName sep sessionFolder sep 'behavior' sep sessionName '.asc'];
 
 if isstrprop(sessionName(end), 'alpha')
