@@ -38,8 +38,7 @@ combinedAllChoice_R_threat = [];
 for i = 1: length(dayList)
         sessionName = dayList{i};                       %extract relevant info from session title
         [animalName, date] = strtok(sessionName, 'd'); 
-        sessionName = ['m' sessionName];
-        %animalName = animalName(2:end);
+        animalName = animalName(2:end);
         date = date(1:9);
         sessionFolder = ['m' animalName date];
 

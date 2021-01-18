@@ -25,10 +25,9 @@ t = title(category);
 
 for d = 1: length(dayList)
     sessionName = dayList{d};
-    sessionName = ['m' sessionName];
     [animalName, date] = strtok(sessionName, 'd'); 
     animalName = animal;
-%     date = date(1:9);
+    date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
         behSessionDataPath = [root animalName sep sessionFolder sep 'sortedap' sep 'session ' sessionName(end) sep sessionName '_behSessionData_behav.mat'];

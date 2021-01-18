@@ -38,7 +38,7 @@ for i = 1: length(dayList)
     animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
-    sessionName = ['m' sessionName];
+    
 
     if isstrprop(sessionName(end), 'alpha')
         sessionDataPath = [root animalName sep sessionFolder sep 'sorted' sep 'session' sep sessionName(end) sep sessionName '_sessionData.mat'];
@@ -59,6 +59,7 @@ for i = 1: length(dayList)
     responseInds = find(~isnan([behSessionData.rewardTime]));
     stateType = [behSessionData(responseInds).stateType];
      stateChangeInds = [1 (find(abs(diff([behSessionData(responseInds).stateType])) == 1) + 1) length(responseInds)];
+     stateChangeInd = [1 (find(abs(diff(stateType)) == 1) + 1) length(responseInds)];
     %     allAirpuff = NaN(1,length(behSessionData(responseInds_threat)));
     %     allAirpuffInd = [behSessionData(responseInds_threat).AirpuffTimeOn];
     %     allAirpuff(~allAirpuffInd == 0) = 1;

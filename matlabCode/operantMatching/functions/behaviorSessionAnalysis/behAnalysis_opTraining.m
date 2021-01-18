@@ -26,6 +26,7 @@ if coupledFlag
 else
     if exist(behSessionDataPath,'file')
         load(behSessionDataPath);
+        behSessionData = sessionData;
         
     else
         [behSessionData, blockSwitch, blockSwitchL, blockSwitchR] = generateSessionData_operantMatchingDecoupledTraining(sessionName);

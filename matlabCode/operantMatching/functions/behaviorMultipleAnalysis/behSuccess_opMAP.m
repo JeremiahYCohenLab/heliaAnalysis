@@ -47,9 +47,9 @@ allRewardsCombThreat = [];
 for i = 1: length(dayList)
     sessionName = ['m' dayList{i}];
     [animalName, date] = strtok(sessionName, 'd'); 
-%     animalName = animalName(2:end);
+    animalName = animalName(2:end);
     date = date(1:9);
-    sessionFolder = [animalName date];
+    sessionFolder = ['m' animalName date];
 
 
     if isstrprop(sessionName(end), 'alpha')

@@ -29,8 +29,7 @@ lickLatencythreatOrg = zeros(length(dayList), 2);
 for i = 1: length(dayList)
     sessionName = dayList{i};
     [animalName, date] = strtok(sessionName, 'd'); 
-    %animalName = animalName(2:end);
-    sessionName = ['m' sessionName];
+    animalName = animalName(2:end);
     date = date(1:9);
     sessionFolder = ['m' animalName date];
     if isstrprop(sessionName(end), 'alpha')
