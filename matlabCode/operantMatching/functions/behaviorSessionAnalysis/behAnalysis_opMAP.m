@@ -39,7 +39,9 @@ end
 %% Break session down into CS+ trials where animal responded
 responseInds = find(~isnan([behSessionData.rewardTime])); % find CS+ trials with a response in the lick window%%response or correct response?
 omitInds = isnan([behSessionData.rewardTime]); 
-
+stateType = [behSessionData(responseInds).stateType];
+stateTypeSafeInd = find(stateType ==0);
+stateTypeThreatInd = find(stateType ==1);
 %%stateInds_safe = find([behSessionData.stateType] == 0); 
 %%stateInds_threat = find([behSessionData.stateType]== 1);
 
@@ -70,6 +72,35 @@ allChoice_L = double(allChoices == -1);
 allRewards = zeros(1,length(allChoices));
 allRewards(logical(allReward_R)) = 1; %%gives alues to reward R and L values 1 and -1 respectively
 allRewards(logical(allReward_L)) = -1;
+allReward_RSafe = allReward_R(stateTypeSafeInd);
+allReward_RThreat = allReward_R(stateTypeThreatInd);
+allReward_LSafe = allReward_L(stateTypeSafeInd);
+allReward_LThreat = allReward_L(stateTypeThreatInd);
+allChoicesSafe = NaN(1,length(stateTypeSafeInd));
+allChoicesThreat = NaN(1,length(stateTypeThreatInd));
+allChoicesSafe(~isnan(allReward_LSafe)) = -1;
+allChoicesSafe(~isnan(allReward_RSafe)) = 1;
+allChoicesThreat(~isnan(allReward_LThreat)) = -1;
+allChoicesThreat(~isnan(allReward_RThreat)) = 1;
+allChoice_RSafe = double(allChoicesSafe == 1);
+allChoice_LSafe = double(allChoicesSafe == -1);
+allChoice_RThreat = double(allChoicesThreat == 1);
+allChoice_LThreat = double(allChoicesThreat == -1);
+
+allReward_RSafe(isnan(allReward_RSafe)) = 0;
+allReward_LSafe(isnan(allReward_LSafe)) = 0;
+
+allReward_RThreat(isnan(allReward_RThreat)) = 0;
+allReward_LThreat(isnan(allReward_LThreat)) = 0;
+
+allRewardsSafe = zeros(1,length(allChoicesSafe));
+allRewardsSafe(logical(allReward_RSafe)) = 1;
+allRewardsSafe(logical(allReward_LSafe)) = 1;
+
+allRewardsThreat = zeros(1,length(allChoicesThreat));
+allRewardsThreat(logical(allReward_RThreat)) = 1;
+allRewardsThreat(logical(allReward_LThreat)) = 1;
+
 
 allITIs = [behSessionData(responseInds).trialEnd] - [behSessionData(responseInds).CSon];
 if ~coupledFlag
@@ -81,7 +112,12 @@ if blockSwitch(end) == length(allChoices)
     blockSwitch = blockSwitch(1:end-1);
 end
 
-
+rewards_safe =  sum(allRewardsSafe);
+rewards_threat = sum(allRewardsThreat);
+trials_safe = length(stateTypeSafeInd);
+trials_threat =length(stateTypeThreatInd);
+rewardFraction_safe = rewards_safe/trials_safe;
+rewardFraction_threat = rewards_threat/trials_threat;
 %% 
 hf =figure;
 set(gcf, 'Position', get(0,'Screensize'));
@@ -889,3 +925,5 @@ end
 if saveFigFlag == 1
     saveFigurePDF(gcf,[savePath sep sessionName '_lickBehavior'])
 end
+disp(rewardFraction_safe);
+disp(rewardFraction_threat);

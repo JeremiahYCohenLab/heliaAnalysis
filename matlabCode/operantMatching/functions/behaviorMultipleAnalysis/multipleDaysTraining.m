@@ -25,7 +25,6 @@ t = title(category);
 
 for d = 1: length(dayList)
     sessionName = dayList{d};
-    sessionName = ['m' sessionName];
     [animalName, date] = strtok(sessionName, 'd'); 
     animalName = animal;
 %     date = date(1:9);
